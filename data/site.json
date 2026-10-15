@@ -1,0 +1,56 @@
+{
+  "doctors": [
+    {
+      "id": "d1",
+      "name": "Sobitjon Qurbonov",
+      "role": "Nevrolog",
+      "description": "Nevrologiya mutaxassisi",
+      "image": "/doctor-1.png",
+      "phone": "+998909105501",
+      "telegram": "https://t.me/sobitjon_090",
+      "accent": "neyro"
+    },
+    {
+      "id": "d2",
+      "name": "Saidburxon Turgunboyev",
+      "role": "Kardiolog",
+      "description": "Kardiologiya mutaxassisi",
+      "image": "/doctor-2.png",
+      "phone": "+998976305959",
+      "telegram": "https://t.me/Drsaidburxon",
+      "accent": "cardio"
+    }
+  ],
+  "videos": [
+    {
+      "id": "_73tycXgc5E",
+      "title": "STRESS MIYAGA QANDAY TA’SIR QILADI?"
+    },
+    {
+      "id": "Ok1ZAK3LvRA",
+      "title": "Parkinson kasalligi — sabablari"
+    },
+    {
+      "id": "LW7kcd6s_OI",
+      "title": "Yurak nega og‘riydi?",
+      "start": 55
+    },
+    {
+      "id": "ZUxBWlhH37g",
+      "title": "Bosh aylanishi — sabablari"
+    },
+    {
+      "id": "dhQWfXjt_9Y",
+      "title": "QON BOSIMINI O‘LCHASHDA YO‘L QO‘YILADIGAN XATOLAR"
+    },
+    {
+      "id": "GLH4FCgnCGc",
+      "title": "Yurak og‘rig‘i qachon xavfli? Stenokardiya va infarkt xavfi"
+    },
+    {
+      "id": "5whqYjafpVI",
+      "title": "Uyqu-Miya va Tana Uchun Nega Muhim?",
+      "start": 30
+    }
+  ]
+}
