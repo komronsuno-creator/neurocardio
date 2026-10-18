@@ -8,7 +8,18 @@
       "image": "/doctor-1.png",
       "phone": "+998909105501",
       "telegram": "https://t.me/sobitjon_090",
-      "accent": "neyro"
+      "accent": "neyro",
+      "bio": "Qurbonov Sobitjon Odiljon o'g'li (Sobitjon Odiljonovich Qurbonov) — Toshkent shahrida faoliyat yurituvchi shifokor, nevropatolog, neyrofiziolog va terapevt",
+      "experience": "",
+      "education": "",
+      "schedule": "",
+      "address": "",
+      "ru": {
+        "name": "Собитжон Курбонов",
+        "role": "Невролог",
+        "description": "Специалист по неврологии",
+        "bio": "Курбонов Собитжон Одилжон угли (Собитжон Одилжонович Курбонов) — врач, практикующий в Ташкенте: невропатолог, нейрофизиолог и терапевт."
+      }
     },
     {
       "id": "d2",
@@ -18,39 +29,51 @@
       "image": "/doctor-2.png",
       "phone": "+998976305959",
       "telegram": "https://t.me/Drsaidburxon",
-      "accent": "cardio"
+      "accent": "cardio",
+      "ru": {
+        "name": "Саидбурхон Тургунбоев",
+        "role": "Кардиолог",
+        "description": "Специалист по кардиологии"
+      }
     }
   ],
   "videos": [
     {
       "id": "_73tycXgc5E",
-      "title": "STRESS MIYAGA QANDAY TA’SIR QILADI ?"
+      "title": "STRESS MIYAGA QANDAY TA’SIR QILADI ?",
+      "titleRu": "Как стресс влияет на мозг?"
     },
     {
       "id": "Ok1ZAK3LvRA",
-      "title": "Parkinson kasalligi — sabablari"
+      "title": "Parkinson kasalligi — sabablari",
+      "titleRu": "Болезнь Паркинсона — причины"
     },
     {
       "id": "LW7kcd6s_OI",
       "title": "Yurak nega og‘riydi?",
-      "start": 55
+      "start": 55,
+      "titleRu": "Почему болит сердце?"
     },
     {
       "id": "ZUxBWlhH37g",
-      "title": "Bosh aylanishi — sabablari"
+      "title": "Bosh aylanishi — sabablari",
+      "titleRu": "Головокружение — причины"
     },
     {
       "id": "dhQWfXjt_9Y",
-      "title": "QON BOSIMINI O‘LCHASHDA YO‘L QO‘YILADIGAN XATOLAR"
+      "title": "QON BOSIMINI O‘LCHASHDA YO‘L QO‘YILADIGAN XATOLAR",
+      "titleRu": "Ошибки при измерении артериального давления"
     },
     {
       "id": "GLH4FCgnCGc",
-      "title": "Yurak og‘rig‘i qachon xavfli? Stenokardiya va infarkt xavfi"
+      "title": "Yurak og‘rig‘i qachon xavfli? Stenokardiya va infarkt xavfi",
+      "titleRu": "Когда боль в сердце опасна? Стенокардия и риск инфаркта"
     },
     {
       "id": "5whqYjafpVI",
       "title": "Uyqu-Miya va Tana Uchun Nega Muhim?",
-      "start": 30
+      "start": 30,
+      "titleRu": "Почему сон важен для мозга и тела?"
     }
   ]
 }

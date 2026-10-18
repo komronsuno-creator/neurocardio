@@ -1,14 +1,17 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { connection } from "next/server";
 import HomeClient from "./home-client";
 import { readData } from "./lib/store";
+import { LANG_COOKIE, isLang } from "./lib/i18n";
 
 // Ma'lumotlar har so'rovda yangidan o'qiladi, shuning uchun admin paneldagi o'zgarishlar darhol ko'rinadi.
 // (Next 16 cacheComponents bilan `export const dynamic` ishlamaydi, o'rniga connection() ishlatiladi.)
 async function Content() {
   await connection();
-  const { doctors, videos } = await readData();
-  return <HomeClient doctors={doctors} videos={videos} />;
+  const [{ doctors, videos }, jar] = await Promise.all([readData(), cookies()]);
+  const saved = jar.get(LANG_COOKIE)?.value;
+  return <HomeClient doctors={doctors} videos={videos} initialLang={isLang(saved) ? saved : "uz"} />;
 }
 
 export default function Page() {

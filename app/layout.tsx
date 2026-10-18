@@ -52,7 +52,7 @@ export default function RootLayout({
         {/* Tungi rejim */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t;if(sessionStorage.getItem("nc_intro"))document.documentElement.classList.add("no-intro")}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t;if(sessionStorage.getItem("nc_intro"))document.documentElement.classList.add("no-intro");var l=document.cookie.match(/(?:^|; )lang=(uz|ru)/);if(l)document.documentElement.lang=l[1]}catch(e){}`,
           }}
         />
       </head>

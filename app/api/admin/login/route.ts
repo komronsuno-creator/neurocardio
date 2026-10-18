@@ -7,6 +7,7 @@ import {
   isAdmin,
   makeToken,
 } from "../../../lib/auth";
+import { storageKind } from "../../../lib/store";
 
 
 // Parolni ko'p marta taxmin qilishdan himoya: 10 daqiqada 8 ta urinish
@@ -20,13 +21,19 @@ function clientKey(req: NextRequest) {
 
 // Holatni tekshirish: kirganmi? parol sozlanganmi?
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ configured: adminConfigured(), authed: isAdmin(req) });
+  return NextResponse.json(
+    { configured: adminConfigured(), authed: isAdmin(req), storage: storageKind() },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(req: NextRequest) {
   if (!adminConfigured()) {
     return NextResponse.json(
-      { error: "ADMIN_PASSWORD o‘rnatilmagan. .env.local fayliga qo‘shing va serverni qayta ishga tushiring." },
+      {
+        error:
+          "ADMIN_PASSWORD o‘rnatilmagan. Kompyuterda: .env.local fayliga qo‘shing. Netlify'da: Site configuration → Environment variables bo‘limiga qo‘shib, saytni qayta deploy qiling.",
+      },
       { status: 503 },
     );
   }

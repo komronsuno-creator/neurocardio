@@ -1,9 +1,7 @@
 import { NextRequest } from "next/server";
 import { randomBytes } from "crypto";
-import { promises as fs } from "fs";
-import path from "path";
 import { isAdmin, unauthorized } from "../../../lib/auth";
-import { UPLOAD_DIR } from "../../../lib/store";
+import { saveUpload, storageError } from "../../../lib/store";
 
 
 const MAX = 5 * 1024 * 1024; // 5 MB
@@ -37,7 +35,12 @@ export async function POST(req: NextRequest) {
   }
 
   const name = `${randomBytes(8).toString("hex")}.${ext}`;
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  await fs.writeFile(path.join(UPLOAD_DIR, name), buf);
+  const type = ext === "jpg" ? "image/jpeg" : `image/${ext}`;
+  try {
+    await saveUpload(name, buf, type);
+  } catch (err) {
+    console.error("Rasm saqlanmadi:", err);
+    return Response.json({ error: storageError(err) }, { status: 500 });
+  }
   return Response.json({ ok: true, url: `/api/uploads/${name}` });
 }

@@ -1,0 +1,485 @@
+/* =====================================================================
+   PREMIUM QATLAM: til tugmasi, SVG belgilar, ishonch qatori,
+   bo'lim raqamlari, kengaytirilgan footer va admin qo'shimchalari.
+   Shisha yuzalar neytral (oq) qoladi, rang faqat urg'ularda.
+   ===================================================================== */
+
+/* ---------- SVG belgilar ---------- */
+
+.ico {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.direction-icon {
+  color: var(--blue);
+  font-size: 26px;
+}
+
+.direction-icon .ico {
+  width: 26px;
+  height: 26px;
+}
+
+.float-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.float-chip .ico {
+  width: 16px;
+  height: 16px;
+  color: var(--blue);
+}
+
+/* ---------- Til tugmasi (UZ / RU) ---------- */
+
+.lang-switch {
+  position: relative;
+  display: inline-grid;
+  height: 44px;
+  flex: none;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(20, 24, 32, 0.04),
+    0 6px 16px rgba(20, 24, 32, 0.08);
+}
+
+.lang-switch button {
+  position: relative;
+  z-index: 1;
+  min-width: 38px;
+  height: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  transition: color 300ms ease;
+}
+
+.lang-switch button[aria-pressed="true"] {
+  color: var(--navy);
+}
+
+.lang-switch button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.lang-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.82));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 4px 12px rgba(20, 24, 32, 0.14),
+    0 1px 2px rgba(20, 24, 32, 0.08);
+  transition: transform 520ms var(--ease);
+}
+
+.lang-switch[data-lang="ru"] .lang-thumb {
+  transform: translateX(100%);
+}
+
+/* ---------- Bo'lim raqamlari ---------- */
+
+.tag {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.tag-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--navy);
+  font-feature-settings: "tnum";
+  font-weight: 800;
+  opacity: 0.55;
+}
+
+.tag-num::after {
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  opacity: 0.6;
+}
+
+/* ---------- Ishonch qatori ---------- */
+
+.trust {
+  position: relative;
+  z-index: 2;
+  margin-top: -34px;
+  padding: 0 24px;
+}
+
+.trust-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 10px;
+  border-radius: 32px;
+}
+
+.trust-row > li {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.trust-row > li + li::before {
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(20, 24, 32, 0.12), transparent);
+  content: "";
+}
+
+.trust-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 16px rgba(20, 24, 32, 0.08);
+  color: var(--blue);
+}
+
+.trust-icon .ico {
+  width: 20px;
+  height: 20px;
+}
+
+.trust-row strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+}
+
+.trust-row span:not(.trust-icon) {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer.footer-rich {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1.2fr 0.9fr;
+  align-items: start;
+  gap: 32px;
+  padding: 40px 44px;
+  border-radius: 36px;
+}
+
+.footer-brand p {
+  max-width: 300px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-col h4 {
+  margin: 4px 0 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.footer-col a {
+  width: fit-content;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 250ms ease, transform 300ms var(--ease);
+}
+
+.footer-col a:hover {
+  color: var(--blue);
+  transform: translateX(3px);
+}
+
+.footer-col a small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.footer-social {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-social .ico {
+  width: 20px;
+  height: 20px;
+  color: var(--blue);
+}
+
+.footer-disclaimer {
+  width: min(1180px, 100%);
+  margin: 22px auto 0;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  opacity: 0.85;
+  text-align: center;
+}
+
+.footer-bottom {
+  margin-top: 10px !important;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Tungi rejim ---------- */
+
+:root[data-theme="dark"] .lang-switch {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .lang-thumb {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .tag-num {
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .trust-row > li + li::before {
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+}
+
+:root[data-theme="dark"] .trust-icon {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  color: var(--blue-soft);
+}
+
+:root[data-theme="dark"] .direction-icon,
+:root[data-theme="dark"] .float-chip .ico,
+:root[data-theme="dark"] .footer-social .ico {
+  color: var(--blue-soft);
+}
+
+/* ---------- Planshet ---------- */
+
+@media (max-width: 1000px) {
+  .trust-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trust-row > li:nth-child(3)::before {
+    display: none;
+  }
+
+  .site-footer.footer-rich {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- Telefon ---------- */
+
+@media (max-width: 760px) {
+  .lang-switch {
+    height: 40px;
+    padding: 3px;
+  }
+
+  .lang-switch button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .lang-thumb {
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+  }
+
+  .trust {
+    margin-top: 18px;
+    padding: 0 16px;
+  }
+
+  .trust-row {
+    grid-template-columns: 1fr;
+    padding: 6px;
+    border-radius: 26px;
+  }
+
+  .trust-row > li {
+    padding: 14px 14px;
+  }
+
+  .trust-row > li + li::before {
+    top: 0;
+    right: 16px;
+    bottom: auto;
+    left: 16px;
+    display: block !important;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(20, 24, 32, 0.1), transparent);
+  }
+
+  :root[data-theme="dark"] .trust-row > li + li::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  }
+
+  .site-footer.footer-rich {
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 18px;
+    padding: 28px 24px;
+    border-radius: 30px;
+    text-align: left;
+  }
+
+  .footer-brand p {
+    max-width: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-footer.footer-rich {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Admin panel qo'shimchalari ---------- */
+
+.adm-storage {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(10, 108, 255, 0.1);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.adm-missing {
+  color: #c27803 !important;
+}
+
+.adm-ru {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px dashed rgba(127, 140, 165, 0.4);
+  border-radius: 20px;
+}
+
+.adm-ru summary {
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.adm-ru summary span {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.adm-ru[open] summary {
+  margin-bottom: 16px;
+}
+
+.adm-inline {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.adm-inline label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.adm-inline input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(127, 140, 165, 0.3);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--navy);
+}
+
+:root[data-theme="dark"] .adm-inline input {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 760px) {
+  .adm-inline {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ruscha sarlavha uzunroq: shrift biroz kichikroq bo'ladi */
+.hero-card h1[lang="ru"] {
+  font-size: clamp(32px, 4vw, 54px);
+}

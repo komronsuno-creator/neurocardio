@@ -2,22 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import "./extra.css";
+import "./premium.css";
 import DoctorModal from "./doctor-modal";
-import type { Doctor, Video } from "./lib/types";
+import Icon, { type IconName } from "./icons";
+import { DICT, LANG_COOKIE, doctorText, videoTitle } from "./lib/i18n";
+import type { Doctor, Lang, Video } from "./lib/types";
 
-const directions = [
-  { icon: "🧠", title: "Nevrologiya", text: "Miya va asab tizimi salomatligi" },
-  { icon: "❤️", title: "Kardiologiya", text: "Yurak va qon bosimi haqida" },
-  { icon: "🛡️", title: "Profilaktika", text: "Kasalliklarning oldini olish" },
-  { icon: "🌙", title: "Uyqu va stress", text: "Sog‘lom uyqu va ruhiy salomatlik" },
-];
-
-const menuLinks = [
-  { href: "#yonalishlar", label: "Yo‘nalishlar" },
-  { href: "#shifokorlar", label: "Shifokorlar" },
-  { href: "#videolar", label: "Videolar" },
-  { href: "#qabul", label: "Qabul" },
-];
+const directionIcons: IconName[] = ["brain", "heart", "shield", "moon"];
+const trustIcons: IconName[] = ["stethoscope", "flask", "play", "send"];
+const menuIds = ["yonalishlar", "shifokorlar", "videolar", "qabul"] as const;
 
 
 // Tungi/kunduzgi rejim: oddiy JavaScript, React'ga bog'liq emas.
@@ -39,7 +32,8 @@ const themeScript = `
     if (!btn) return;
     var dark = current() === "dark";
     btn.setAttribute("aria-pressed", dark ? "true" : "false");
-    btn.setAttribute("aria-label", dark ? "Kunduzgi rejimga o\u2018tish" : "Tungi rejimga o\u2018tish");
+    var ru = root.lang === "ru";
+    btn.setAttribute("aria-label", dark ? (ru ? "Светлая тема" : "Kunduzgi rejimga o\u2018tish") : (ru ? "Тёмная тема" : "Tungi rejimga o\u2018tish"));
   }
 
   function apply(next) {
@@ -91,7 +85,23 @@ const themeScript = `
 })();
 `;
 
-export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: Video[] }) {
+export default function Home({
+  doctors,
+  videos,
+  initialLang = "uz",
+}: {
+  doctors: Doctor[];
+  videos: Video[];
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const t = DICT[lang];
+  const menuLinks = [
+    { href: `#${menuIds[0]}`, label: t.nav.directions },
+    { href: `#${menuIds[1]}`, label: t.nav.doctors },
+    { href: `#${menuIds[2]}`, label: t.nav.videos },
+    { href: `#${menuIds[3]}`, label: t.nav.contact },
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [year, setYear] = useState(2026);
@@ -705,13 +715,25 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
     };
   }, []);
 
+  // Til almashtirish: sahifa qayta yuklanmaydi, tanlov cookie'da saqlanadi (keyingi kirishda ham shu til)
+  function changeLang(next: Lang) {
+    if (next === lang) return;
+    setLang(next);
+    document.documentElement.lang = next;
+    document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+  }
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   function handleAppointment(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const doctor = doctors.find((item) => item.id === selectedDoctor);
 
     if (!doctor) {
-      alert("Iltimos, avval shifokorni tanlang.");
+      alert(t.contact.chooseFirst);
       return;
     }
 
@@ -776,14 +798,29 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
           </div>
 
           <div className="nav-actions">
+            <div className="lang-switch" role="group" aria-label={t.nav.lang} data-lang={lang}>
+              <span className="lang-thumb" aria-hidden="true" />
+              {(["uz", "ru"] as Lang[]).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  lang={code}
+                  aria-pressed={lang === code}
+                  onClick={() => changeLang(code)}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
             <a className="nav-cta" href="#qabul">
-              Qabulga yozilish
+              {t.nav.cta}
             </a>
 
             <button
               type="button"
               className="theme-toggle"
-              aria-label="Rejimni almashtirish"
+              aria-label={t.nav.theme}
               suppressHydrationWarning
             >
               <svg className="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -798,7 +835,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
             <button
               type="button"
               className="menu-button"
-              aria-label={menuOpen ? "Menyuni yopish" : "Menyuni ochish"}
+              aria-label={menuOpen ? t.nav.menuClose : t.nav.menuOpen}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
             >
@@ -828,7 +865,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
             tabIndex={menuOpen ? 0 : -1}
             onClick={() => setMenuOpen(false)}
           >
-            Qabulga yozilish
+            {t.nav.cta}
           </a>
         </div>
       </header>
@@ -853,13 +890,17 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
             >
               {doctor.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={doctor.image} alt={doctor.name} draggable={false} />
+                <img src={doctor.image} alt={doctorText(doctor, "name", lang)} draggable={false} />
               ) : null}
             </div>
           ))}
 
-          <span className="float-chip chip-a glass">🧠 Nevrologiya</span>
-          <span className="float-chip chip-b glass">❤️ Kardiologiya</span>
+          <span className="float-chip chip-a glass">
+            <Icon name="brain" /> {t.hero.chipNeuro}
+          </span>
+          <span className="float-chip chip-b glass">
+            <Icon name="heart" /> {t.hero.chipCardio}
+          </span>
 
           <div className="doctor-pill glass">
             <span className="live-dot" />
@@ -870,8 +911,8 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                   className="pill-text"
                   style={{ "--i": index } as React.CSSProperties}
                 >
-                  <strong>{doctor.name}</strong>
-                  <span>{doctor.role}</span>
+                  <strong>{doctorText(doctor, "name", lang)}</strong>
+                  <span>{doctorText(doctor, "role", lang)}</span>
                 </div>
               ))}
             </div>
@@ -892,44 +933,60 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
         <div className="hero-content">
           <div className="hero-card glass" data-glow>
             <span className="eyebrow">
-              <i /> MIYA · YURAK · SALOMATLIK
+              <i /> {t.hero.eyebrow}
             </span>
 
-            <h1>
-              Sog‘lom hayot
-              <span> ishonchli bilimdan</span>
-              boshlanadi
+            <h1 lang={lang}>
+              {t.hero.title1}
+              <span>{t.hero.title2}</span>
+              {t.hero.title3}
             </h1>
 
-            <p>
-              Nevrologiya, kardiologiya va umumiy salomatlik haqida shifokorlar tayyorlagan sodda
-              va ishonchli ma’lumotlar.
-            </p>
+            <p>{t.hero.text}</p>
 
             <div className="hero-actions">
               <a className="btn btn-primary" href="#qabul">
-                Qabulga yozilish <span>↗</span>
+                {t.hero.cta} <span>↗</span>
               </a>
               <a className="btn btn-glass" href="#videolar">
-                <span>▶</span> Videolar
+                <span>▶</span> {t.hero.videos}
               </a>
             </div>
 
             <div className="hero-stats">
               <div>
                 <strong data-count="100" data-suffix="+">100+</strong>
-                <span>Tibbiy videolar</span>
+                <span>{t.hero.stat1}</span>
               </div>
               <div>
                 <strong data-count={doctors.length}>{doctors.length}</strong>
-                <span>Mutaxassis</span>
+                <span>{t.hero.stat2}</span>
               </div>
               <div>
                 <strong>24/7</strong>
-                <span>Foydali bilimlar</span>
+                <span>{t.hero.stat3}</span>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ============ ISHONCH QATORI ============ */}
+      <section className="trust" aria-label="NeyroCardio">
+        <div className="container">
+          <ul className="trust-row glass reveal">
+            {t.trust.map((item, index) => (
+              <li key={index}>
+                <span className="trust-icon">
+                  <Icon name={trustIcons[index]} />
+                </span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <span>{item.text}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -937,27 +994,28 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
       <section id="yonalishlar" className="section">
         <div className="container">
           <div className="heading reveal">
-            <span className="tag">YO‘NALISHLAR</span>
-            <h2>Salomatlik uchun muhim bilimlar</h2>
-            <p>
-              Organizmni tushunish, sog‘lom odatlarni shakllantirish va kasalliklarning oldini
-              olish haqida.
-            </p>
+            <span className="tag">
+              <b className="tag-num">01</b> {t.directions.tag}
+            </span>
+            <h2>{t.directions.title}</h2>
+            <p>{t.directions.text}</p>
           </div>
 
           <div className="direction-grid">
-            {directions.map((item, index) => (
+            {t.directions.items.map((item, index) => (
               <article
-                key={item.title}
+                key={index}
                 className="direction-card glass reveal"
                 data-glow
                 style={{ "--d": `${index * 90}ms` } as React.CSSProperties}
               >
-                <div className="direction-icon">{item.icon}</div>
+                <div className="direction-icon">
+                  <Icon name={directionIcons[index]} />
+                </div>
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
                 <a href="#videolar">
-                  Batafsil <span>↗</span>
+                  {t.directions.more} <span>↗</span>
                 </a>
               </article>
             ))}
@@ -969,9 +1027,11 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
       <section id="shifokorlar" className="section">
         <div className="container">
           <div className="heading reveal">
-            <span className="tag">MUTAXASSISLAR</span>
-            <h2>Shifokorlarimiz</h2>
-            <p>Mutaxassislar bilan bog‘laning va o‘zingizga kerakli ma’lumotni oling.</p>
+            <span className="tag">
+              <b className="tag-num">02</b> {t.doctors.tag}
+            </span>
+            <h2>{t.doctors.title}</h2>
+            <p>{t.doctors.text}</p>
           </div>
 
           <div className="doctor-grid">
@@ -984,7 +1044,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                 <div className="doctor-photo">
                   {doctor.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={doctor.image} alt={doctor.name} loading="lazy" />
+                    <img src={doctor.image} alt={doctorText(doctor, "name", lang)} loading="lazy" />
                   ) : (
                     <span className="photo-fallback">
                       {doctor.name
@@ -998,9 +1058,9 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                 </div>
 
                 <div className="doctor-info glass" data-glow>
-                  <span className="doctor-role">{doctor.role}</span>
-                  <h3>{doctor.name}</h3>
-                  <p>{doctor.description}</p>
+                  <span className="doctor-role">{doctorText(doctor, "role", lang)}</span>
+                  <h3>{doctorText(doctor, "name", lang)}</h3>
+                  <p>{doctorText(doctor, "description", lang)}</p>
                   <div className="doctor-actions">
                     <a
                       className="btn btn-primary"
@@ -1011,7 +1071,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                       Telegram ↗
                     </a>
                     <a className="phone-link" href={`tel:${doctor.phone}`}>
-                      ☎ Qo‘ng‘iroq
+                      ☎ {t.doctors.call}
                     </a>
                     <button
                       type="button"
@@ -1019,7 +1079,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                       aria-haspopup="dialog"
                       onClick={() => setDetail(doctor)}
                     >
-                      Batafsil
+                      {t.doctors.more}
                     </button>
                   </div>
                 </div>
@@ -1033,12 +1093,11 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
       <section id="videolar" className="section section-videos">
         <div className="container">
           <div className="heading reveal">
-            <span className="tag">VIDEO KUTUBXONASI</span>
-            <h2>Foydali tibbiy videolar</h2>
-            <p>
-              NeyroCardio kanalidagi salomatlik haqidagi videolarni shu sahifaning o‘zida tomosha
-              qiling.
-            </p>
+            <span className="tag">
+              <b className="tag-num">03</b> {t.videos.tag}
+            </span>
+            <h2>{t.videos.title}</h2>
+            <p>{t.videos.text}</p>
           </div>
         </div>
 
@@ -1056,7 +1115,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                 <div className="video-frame">
                   <iframe
                     src={`https://www.youtube-nocookie.com/embed/${video.id}?${params.toString()}`}
-                    title={video.title}
+                    title={videoTitle(video, lang)}
                     loading="lazy"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -1064,8 +1123,8 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
                   />
                 </div>
                 <div className="video-info">
-                  <span>NEYROCARDIO · VIDEO</span>
-                  <h3>{video.title}</h3>
+                  <span>{t.videos.label}</span>
+                  <h3>{videoTitle(video, lang)}</h3>
                 </div>
               </article>
             );
@@ -1080,7 +1139,7 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
               target="_blank"
               rel="noopener noreferrer"
             >
-              YouTube kanaliga o‘tish ↗
+              {t.videos.channel} ↗
             </a>
           </div>
         </div>
@@ -1090,31 +1149,30 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
       <section id="qabul" className="section">
         <div className="container appointment-layout">
           <div className="appointment-copy reveal">
-            <span className="tag">BIZ BILAN BOG‘LANING</span>
-            <h2>Salomatligingizga bugundan e’tibor bering</h2>
-            <p>
-              Kerakli shifokorni tanlang. Sizni tegishli mutaxassisning Telegram sahifasiga
-              yo‘naltiramiz.
-            </p>
+            <span className="tag">
+              <b className="tag-num">04</b> {t.contact.tag}
+            </span>
+            <h2>{t.contact.title}</h2>
+            <p>{t.contact.text}</p>
             <ul className="appointment-points">
-              <li>Mutaxassisni tanlash</li>
-              <li>Telegram orqali bog‘lanish</li>
-              <li>Qulay va sodda</li>
+              {t.contact.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
             </ul>
           </div>
 
           <form className="appointment-form glass reveal" onSubmit={handleAppointment} data-glow>
-            <label htmlFor="patient-name">Ism va familiyangiz</label>
+            <label htmlFor="patient-name">{t.contact.name}</label>
             <input
               id="patient-name"
               name="name"
               type="text"
-              placeholder="Ismingizni kiriting"
+              placeholder={t.contact.namePh}
               autoComplete="name"
               required
             />
 
-            <label htmlFor="patient-phone">Telefon raqamingiz</label>
+            <label htmlFor="patient-phone">{t.contact.phone}</label>
             <input
               id="patient-phone"
               name="phone"
@@ -1125,56 +1183,80 @@ export default function Home({ doctors, videos }: { doctors: Doctor[]; videos: V
               required
             />
 
-            <label htmlFor="doctor-select">Shifokorni tanlang</label>
+            <label htmlFor="doctor-select">{t.contact.doctor}</label>
             <select
               id="doctor-select"
               value={selectedDoctor}
               onChange={(event) => setSelectedDoctor(event.target.value)}
               required
             >
-              <option value="">Shifokorni tanlang</option>
+              <option value="">{t.contact.doctor}</option>
               {doctors.map((doctor) => (
                 <option key={doctor.id} value={doctor.id}>
-                  {doctor.name} — {doctor.role}
+                  {doctorText(doctor, "name", lang)} — {doctorText(doctor, "role", lang)}
                 </option>
               ))}
             </select>
 
             <button className="btn btn-primary form-submit" type="submit">
-              Telegram orqali bog‘lanish <span>↗</span>
+              {t.contact.submit} <span>↗</span>
             </button>
 
-            <p className="form-note">
-              Tugma tanlangan shifokorning Telegram sahifasini ochadi. Ism va telefon raqami
-              avtomatik yuborilmaydi.
-            </p>
+            <p className="form-note">{t.contact.note}</p>
           </form>
         </div>
       </section>
 
       {/* ============ FOOTER ============ */}
       <footer className="footer-wrap">
-        <div className="site-footer glass">
-          <a href="#bosh" className="brand">
-            <span className="brand-heart">♥</span>
-            NeyroCardio
-          </a>
-          <p>Salomatlik haqida ishonchli ma’lumotlar.</p>
-          <a
-            className="footer-link"
-            href="https://www.youtube.com/@Neurocardiouz"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            YouTube ↗
-          </a>
+        <div className="site-footer footer-rich glass">
+          <div className="footer-brand">
+            <a href="#bosh" className="brand">
+              <span className="brand-heart">♥</span>
+              NeyroCardio
+            </a>
+            <p>{t.footer.tagline}</p>
+          </div>
+
+          <nav className="footer-col" aria-label={t.footer.sections}>
+            <h4>{t.footer.sections}</h4>
+            {menuLinks.map((link) => (
+              <a key={link.href} href={link.href}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="footer-col">
+            <h4>{t.footer.doctors}</h4>
+            {doctors.map((doctor) => (
+              <a key={doctor.id} href={doctor.telegram} target="_blank" rel="noopener noreferrer">
+                {doctorText(doctor, "name", lang)}
+                <small>{doctorText(doctor, "role", lang)}</small>
+              </a>
+            ))}
+          </div>
+
+          <div className="footer-col">
+            <h4>{t.footer.follow}</h4>
+            <a
+              className="footer-social"
+              href="https://www.youtube.com/@Neurocardiouz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="youtube" /> YouTube ↗
+            </a>
+          </div>
         </div>
+
+        <p className="footer-disclaimer">{t.footer.disclaimer}</p>
         <div className="footer-bottom">
-          © {year} NeyroCardio.uz Barcha huquqlar himoyalangan.
+          © {year} NeyroCardio.uz · {t.footer.rights}
         </div>
       </footer>
 
-      <DoctorModal doctor={detail} onClose={() => setDetail(null)} />
+      <DoctorModal doctor={detail} lang={lang} onClose={() => setDetail(null)} />
 
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
     </main>

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../extra.css";
-import type { Doctor, Video } from "../lib/types";
+import "../premium.css";
+import type { Doctor, DoctorRu, Video } from "../lib/types";
 import { parseYouTube } from "../lib/youtube";
 
 type Status = "loading" | "login" | "ready" | "unconfigured";
@@ -15,6 +16,17 @@ const EMPTY_DOCTOR = {
   phone: "",
   telegram: "",
   image: "",
+  bio: "",
+  experience: "",
+  education: "",
+  schedule: "",
+  address: "",
+};
+
+const EMPTY_RU: Required<DoctorRu> = {
+  name: "",
+  role: "",
+  description: "",
   bio: "",
   experience: "",
   education: "",
@@ -57,9 +69,13 @@ export default function AdminPage() {
   // video form
   const [videoUrl, setVideoUrl] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
+  const [videoTitleRu, setVideoTitleRu] = useState("");
+  const [editVideo, setEditVideo] = useState<{ id: string; title: string; titleRu: string } | null>(null);
+  const [storage, setStorage] = useState("");
 
   // doctor form
   const [form, setForm] = useState({ ...EMPTY_DOCTOR });
+  const [ru, setRu] = useState({ ...EMPTY_RU });
   const [editId, setEditId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -81,7 +97,10 @@ export default function AdminPage() {
   useEffect(() => {
     (async () => {
       try {
-        const s = await api<{ configured: boolean; authed: boolean }>("/api/admin/login", { cache: "no-store" });
+        const s = await api<{ configured: boolean; authed: boolean; storage?: string }>("/api/admin/login", {
+          cache: "no-store",
+        });
+        setStorage(s.storage ?? "");
         if (!s.configured) return setStatus("unconfigured");
         if (!s.authed) return setStatus("login");
         await loadContent();
@@ -139,9 +158,10 @@ export default function AdminPage() {
     event.preventDefault();
     if (!parsed) return notify("YouTube havolasi noto‘g‘ri.", true);
     run(async () => {
-      await api("/api/admin/videos", jsonInit("POST", { url: videoUrl, title: videoTitle }));
+      await api("/api/admin/videos", jsonInit("POST", { url: videoUrl, title: videoTitle, titleRu: videoTitleRu }));
       setVideoUrl("");
       setVideoTitle("");
+      setVideoTitleRu("");
       await loadContent();
       notify("Video qo‘shildi.");
     });
@@ -156,14 +176,30 @@ export default function AdminPage() {
     });
   }
 
+  function saveVideoTitles(event: React.FormEvent) {
+    event.preventDefault();
+    if (!editVideo) return;
+    run(async () => {
+      await api("/api/admin/videos", jsonInit("PUT", editVideo));
+      setEditVideo(null);
+      await loadContent();
+      notify("Sarlavha saqlandi.");
+    });
+  }
+
   /* ---------- Shifokorlar ---------- */
 
   const setField = (key: keyof typeof EMPTY_DOCTOR) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
+  const setRuField = (key: keyof DoctorRu) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => setRu((prev) => ({ ...prev, [key]: event.target.value }));
+
   function resetForm() {
     setForm({ ...EMPTY_DOCTOR });
+    setRu({ ...EMPTY_RU });
     setEditId(null);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -183,6 +219,7 @@ export default function AdminPage() {
       schedule: doctor.schedule ?? "",
       address: doctor.address ?? "",
     });
+    setRu({ ...EMPTY_RU, ...(doctor.ru ?? {}) });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -212,10 +249,10 @@ export default function AdminPage() {
     event.preventDefault();
     run(async () => {
       if (editId) {
-        await api("/api/admin/doctors", jsonInit("PUT", { ...form, id: editId }));
+        await api("/api/admin/doctors", jsonInit("PUT", { ...form, ru, id: editId }));
         notify("Shifokor ma’lumotlari saqlandi.");
       } else {
-        await api("/api/admin/doctors", jsonInit("POST", form));
+        await api("/api/admin/doctors", jsonInit("POST", { ...form, ru }));
         notify("Shifokor qo‘shildi.");
       }
       resetForm();
@@ -253,10 +290,16 @@ export default function AdminPage() {
         {background}
         <div className="adm-login glass">
           <h1>Admin panel</h1>
+          <p>Parol hali o‘rnatilmagan.</p>
           <p>
-            Parol hali o‘rnatilmagan. Loyiha papkasidagi <code>.env.local</code> fayliga{" "}
-            <code>ADMIN_PASSWORD=sizning_parolingiz</code> qatorini qo‘shing va serverni qayta ishga
-            tushiring.
+            <b>Netlify’da:</b> Site configuration → Environment variables → <b>Add a variable</b>.
+            Key: <code>ADMIN_PASSWORD</code>, Value: o‘z parolingiz. Keyin Deploys → <b>Trigger deploy</b>{" "}
+            → Deploy site.
+          </p>
+          <p>
+            <b>Kompyuterda:</b> loyiha papkasidagi <code>.env.local</code> fayliga{" "}
+            <code>ADMIN_PASSWORD=sizning_parolingiz</code> qatorini qo‘shing va <code>npm run dev</code> ni
+            qayta ishga tushiring.
           </p>
         </div>
       </main>
@@ -314,6 +357,11 @@ export default function AdminPage() {
         <p className="adm-sub">
           Videolar va shifokorlarni shu yerdan qo‘shing yoki o‘chiring. O‘zgarishlar saytda darhol
           ko‘rinadi.
+          {storage ? (
+            <span className="adm-storage">
+              {storage === "netlify-blobs" ? "Saqlash joyi: Netlify Blobs" : "Saqlash joyi: data/ papkasi"}
+            </span>
+          ) : null}
         </p>
 
         <div className="adm-tabs glass" role="tablist">
@@ -369,6 +417,19 @@ export default function AdminPage() {
                     onChange={(e) => setVideoTitle(e.target.value)}
                   />
                 </div>
+                <div className="adm-full">
+                  <label htmlFor="v-title-ru">Sarlavha — ruscha (ixtiyoriy)</label>
+                  <input
+                    id="v-title-ru"
+                    type="text"
+                    lang="ru"
+                    placeholder="Masalan: Почему болит сердце?"
+                    value={videoTitleRu}
+                    maxLength={160}
+                    onChange={(e) => setVideoTitleRu(e.target.value)}
+                  />
+                  <p className="adm-hint">Ruscha sarlavha bo‘sh qolsa, rus tilida ham o‘zbekchasi ko‘rinadi.</p>
+                </div>
               </div>
 
               {videoUrl.trim() ? (
@@ -403,18 +464,57 @@ export default function AdminPage() {
                 <div className="adm-list">
                   {videos.map((video) => (
                     <div className="adm-item" key={video.id}>
+                      {editVideo?.id === video.id ? (
+                        <form className="adm-inline" onSubmit={saveVideoTitles}>
+                          <label>
+                            O‘zbekcha sarlavha
+                            <input
+                              value={editVideo.title}
+                              maxLength={160}
+                              required
+                              onChange={(e) => setEditVideo({ ...editVideo, title: e.target.value })}
+                            />
+                          </label>
+                          <label>
+                            Ruscha sarlavha
+                            <input
+                              lang="ru"
+                              value={editVideo.titleRu}
+                              maxLength={160}
+                              onChange={(e) => setEditVideo({ ...editVideo, titleRu: e.target.value })}
+                            />
+                          </label>
+                          <div className="adm-item-actions">
+                            <button type="submit" className="adm-btn-soft" disabled={busy}>
+                              Saqlash
+                            </button>
+                            <button type="button" className="adm-btn-soft" onClick={() => setEditVideo(null)}>
+                              Bekor qilish
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                      <>
                       <div className="adm-thumb">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={`https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`} alt="" loading="lazy" />
                       </div>
                       <div>
                         <strong>{video.title}</strong>
+                        {video.titleRu ? <small lang="ru">RU: {video.titleRu}</small> : <small className="adm-missing">Ruscha sarlavha yo‘q</small>}
                         <small>
                           youtu.be/{video.id}
                           {video.start ? ` · ${video.start}s` : ""}
                         </small>
                       </div>
                       <div className="adm-item-actions">
+                        <button
+                          type="button"
+                          className="adm-btn-soft"
+                          onClick={() => setEditVideo({ id: video.id, title: video.title, titleRu: video.titleRu ?? "" })}
+                        >
+                          Tahrirlash
+                        </button>
                         <button
                           type="button"
                           className="adm-btn-danger"
@@ -424,6 +524,8 @@ export default function AdminPage() {
                           O‘chirish
                         </button>
                       </div>
+                      </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -554,6 +656,46 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              <details className="adm-ru" open={Boolean(editId && Object.values(ru).some(Boolean))}>
+                <summary>
+                  Ruscha matnlar <span>ixtiyoriy — bo‘sh maydonda o‘zbekchasi ko‘rinadi</span>
+                </summary>
+                <div className="adm-form" lang="ru">
+                  <div>
+                    <label htmlFor="r-name">Ism va familiya (RU)</label>
+                    <input id="r-name" placeholder="Например: Собитжон Курбонов" value={ru.name} onChange={setRuField("name")} maxLength={80} />
+                  </div>
+                  <div>
+                    <label htmlFor="r-role">Mutaxassisligi (RU)</label>
+                    <input id="r-role" placeholder="Например: Невролог" value={ru.role} onChange={setRuField("role")} maxLength={60} />
+                  </div>
+                  <div className="adm-full">
+                    <label htmlFor="r-desc">Qisqa tavsif (RU)</label>
+                    <input id="r-desc" value={ru.description} onChange={setRuField("description")} maxLength={160} />
+                  </div>
+                  <div className="adm-full">
+                    <label htmlFor="r-bio">Batafsil ma’lumot (RU)</label>
+                    <textarea id="r-bio" value={ru.bio} onChange={setRuField("bio")} maxLength={3000} />
+                  </div>
+                  <div>
+                    <label htmlFor="r-exp">Tajriba (RU)</label>
+                    <input id="r-exp" value={ru.experience} onChange={setRuField("experience")} maxLength={120} />
+                  </div>
+                  <div>
+                    <label htmlFor="r-sched">Qabul vaqti (RU)</label>
+                    <input id="r-sched" value={ru.schedule} onChange={setRuField("schedule")} maxLength={200} />
+                  </div>
+                  <div>
+                    <label htmlFor="r-edu">Ta’lim (RU)</label>
+                    <input id="r-edu" value={ru.education} onChange={setRuField("education")} maxLength={400} />
+                  </div>
+                  <div>
+                    <label htmlFor="r-addr">Manzil (RU)</label>
+                    <input id="r-addr" value={ru.address} onChange={setRuField("address")} maxLength={200} />
+                  </div>
+                </div>
+              </details>
+
               <div className="adm-row">
                 <button className="btn btn-primary" type="submit" disabled={busy || uploading}>
                   {editId ? "Saqlash" : "Qo‘shish"}
@@ -587,6 +729,7 @@ export default function AdminPage() {
                         <small>
                           {doctor.role} · {doctor.phone}
                         </small>
+                        {doctor.ru?.name ? <small lang="ru">RU: {doctor.ru.name}</small> : <small className="adm-missing">Ruscha matn yo‘q</small>}
                       </div>
                       <div className="adm-item-actions">
                         <button type="button" className="adm-btn-soft" onClick={() => startEdit(doctor)}>

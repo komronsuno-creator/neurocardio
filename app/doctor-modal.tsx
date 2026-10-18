@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { Doctor } from "./lib/types";
+import { DICT, doctorText } from "./lib/i18n";
+import type { Doctor, Lang } from "./lib/types";
 
 function initials(name: string) {
   return name
@@ -16,9 +17,11 @@ function initials(name: string) {
 // "Batafsil" bosilganda sahifaning o'zida ochiladigan suyuq shisha oynasi
 export default function DoctorModal({
   doctor,
+  lang = "uz",
   onClose,
 }: {
   doctor: Doctor | null;
+  lang?: Lang;
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -98,11 +101,15 @@ export default function DoctorModal({
   if (!mounted || !shown) return null;
 
   const d = shown;
+  const t = DICT[lang].modal;
+  const tr = (key: Parameters<typeof doctorText>[1]) => doctorText(d, key, lang);
+  const name = tr("name");
+  const bio = tr("bio");
   const facts = [
-    { label: "Tajriba", value: d.experience },
-    { label: "Ta’lim", value: d.education },
-    { label: "Qabul vaqti", value: d.schedule },
-    { label: "Manzil", value: d.address },
+    { label: t.experience, value: tr("experience") },
+    { label: t.education, value: tr("education") },
+    { label: t.schedule, value: tr("schedule") },
+    { label: t.address, value: tr("address") },
   ].filter((item) => item.value);
 
   return createPortal(
@@ -124,7 +131,7 @@ export default function DoctorModal({
           ref={closeRef}
           type="button"
           className="detail-close"
-          aria-label="Yopish"
+          aria-label={t.close}
           onClick={() => onCloseRef.current()}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -137,20 +144,20 @@ export default function DoctorModal({
             <div className="detail-photo">
               {d.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={d.image} alt={d.name} draggable={false} />
+                <img src={d.image} alt={name} draggable={false} />
               ) : (
-                <span className="photo-fallback">{initials(d.name)}</span>
+                <span className="photo-fallback">{initials(name)}</span>
               )}
             </div>
 
             <div className="detail-titles">
-              <span className="doctor-role">{d.role}</span>
-              <h3 id="detail-title">{d.name}</h3>
-              <p>{d.description}</p>
+              <span className="doctor-role">{tr("role")}</span>
+              <h3 id="detail-title">{name}</h3>
+              <p>{tr("description")}</p>
             </div>
           </div>
 
-          {d.bio ? <p className="detail-bio">{d.bio}</p> : null}
+          {bio ? <p className="detail-bio">{bio}</p> : null}
 
           {facts.length > 0 ? (
             <dl className="detail-facts">
@@ -163,8 +170,8 @@ export default function DoctorModal({
             </dl>
           ) : null}
 
-          {!d.bio && facts.length === 0 ? (
-            <p className="detail-empty">Shifokor haqida batafsil ma’lumot tez orada qo‘shiladi.</p>
+          {!bio && facts.length === 0 ? (
+            <p className="detail-empty">{t.empty}</p>
           ) : null}
 
           <div className="detail-actions">
@@ -172,7 +179,7 @@ export default function DoctorModal({
               Telegram ↗
             </a>
             <a className="btn btn-glass" href={`tel:${d.phone}`}>
-              ☎ Qo‘ng‘iroq
+              ☎ {DICT[lang].doctors.call}
             </a>
           </div>
         </div>
