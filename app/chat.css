@@ -1,0 +1,854 @@
+/* =====================================================================
+   SAVOL-JAVOB CHATI — suyuq shisha.
+   Bemor xabarlari: neytral shisha. Shifokor xabarlari: rangli shisha,
+   rasm halqasi va "Shifokor" belgisi bilan (nevrolog — ko'k, kardiolog — qizil).
+   ===================================================================== */
+
+.section-chat {
+  --doc-neyro-a: #3b8cff;
+  --doc-neyro-b: #0a58db;
+  --doc-cardio-a: #ff6b7d;
+  --doc-cardio-b: #d42a4e;
+}
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.25fr);
+  align-items: start;
+  gap: 48px;
+}
+
+.chat-layout .heading {
+  position: sticky;
+  top: 120px;
+  margin-bottom: 0;
+}
+
+/* ---------- Oyna ---------- */
+
+.chat-shell {
+  display: flex;
+  height: min(680px, 78vh);
+  min-height: 460px;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 34px;
+}
+
+.chat-shell > * {
+  position: relative;
+  z-index: 2;
+}
+
+.chat-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(20, 24, 32, 0.07);
+}
+
+.chat-avatars {
+  display: flex;
+}
+
+.chat-ava {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #dfe6f2;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(20, 24, 32, 0.14);
+}
+
+.chat-ava + .chat-ava {
+  margin-left: -10px;
+}
+
+.chat-ava img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.chat-top-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-top-text strong {
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.chat-top-text span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chat-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: chat-live 2.2s ease-out infinite;
+}
+
+@keyframes chat-live {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px rgba(34, 197, 94, 0);
+  }
+}
+
+.chat-me {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px 10px;
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.chat-me span {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(10, 108, 255, 0.12);
+  color: var(--blue);
+  font-weight: 750;
+}
+
+.chat-me a,
+.chat-me button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chat-me a:hover,
+.chat-me button:hover {
+  color: var(--blue);
+}
+
+/* ---------- Xabarlar ---------- */
+
+.chat-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.chat-empty {
+  margin: auto;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.chat-day {
+  width: fit-content;
+  margin: 8px auto 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(127, 140, 165, 0.14);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.chat-row {
+  display: flex;
+  max-width: min(88%, 560px);
+  align-items: flex-end;
+  gap: 10px;
+  animation: chat-in 420ms var(--ease) both;
+}
+
+.chat-row.is-own {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+@keyframes chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.chat-ava-lg {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #eef2f8, #d9e1ee);
+  color: #4c5b78;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chat-ava-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.chat-bubble {
+  position: relative;
+  min-width: 0;
+  padding: 11px 14px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px 20px 20px 6px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 6px 18px rgba(20, 24, 32, 0.07);
+}
+
+.chat-row.is-own:not(.is-doctor) .chat-bubble {
+  border-radius: 20px 20px 6px 20px;
+  background: linear-gradient(145deg, rgba(232, 241, 255, 0.95), rgba(214, 229, 255, 0.75));
+}
+
+.chat-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-bottom: 3px;
+}
+
+.chat-meta strong {
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.chat-meta time {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-bubble p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.chat-quote {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0 7px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--blue);
+  border-radius: 8px;
+  background: rgba(10, 108, 255, 0.07);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.chat-quote b {
+  font-weight: 750;
+}
+
+.chat-quote span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 200ms ease, max-height 260ms var(--ease), margin 260ms var(--ease);
+}
+
+.chat-row:hover .chat-actions,
+.chat-row:focus-within .chat-actions {
+  max-height: 30px;
+  margin-top: 6px;
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .chat-actions {
+    max-height: 30px;
+    margin-top: 6px;
+    opacity: 1;
+  }
+}
+
+.chat-actions button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.chat-actions .is-danger {
+  color: #d92d4b;
+}
+
+.chat-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* ---------- Shifokor xabari: rangli shisha ---------- */
+
+.chat-row.is-doctor .chat-ava-lg {
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border: 0;
+  background: linear-gradient(145deg, var(--doc-a), var(--doc-b));
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--doc-b) 40%, transparent);
+}
+
+.chat-row.is-doctor .chat-ava-lg img {
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.chat-row.tone-neyro {
+  --doc-a: var(--doc-neyro-a);
+  --doc-b: var(--doc-neyro-b);
+}
+
+.chat-row.tone-cardio {
+  --doc-a: var(--doc-cardio-a);
+  --doc-b: var(--doc-cardio-b);
+}
+
+.chat-row.is-doctor .chat-bubble {
+  border-color: rgba(255, 255, 255, 0.45);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(145deg, var(--doc-a), var(--doc-b));
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 12px 28px color-mix(in srgb, var(--doc-b) 32%, transparent);
+  color: #fff;
+}
+
+.chat-row.is-doctor.is-own .chat-bubble {
+  border-radius: 20px 20px 6px 20px;
+}
+
+.chat-row.is-doctor .chat-meta time,
+.chat-row.is-doctor .chat-quote span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.chat-row.is-doctor .chat-quote {
+  border-left-color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.chat-row.is-doctor .chat-actions button {
+  color: #fff;
+}
+
+.chat-row.is-doctor .chat-actions .is-danger {
+  color: #ffe1e6;
+}
+
+.chat-row.is-doctor .chat-confirm {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chat-badge svg {
+  width: 14px;
+  height: 14px;
+  fill: #fff;
+  stroke: var(--doc-b);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.chat-badge svg path:first-child {
+  stroke: none;
+}
+
+/* ---------- Yozish joyi ---------- */
+
+.chat-bottom {
+  padding: 12px 16px 14px;
+  border-top: 1px solid rgba(20, 24, 32, 0.07);
+}
+
+.chat-name label {
+  display: block;
+  margin: 2px 4px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chat-name > div {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-name input,
+.chat-input textarea {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 3px rgba(20, 24, 32, 0.08);
+  color: var(--navy);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.chat-name input {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 999px;
+}
+
+.chat-name input:focus,
+.chat-input textarea:focus {
+  border-color: rgba(10, 108, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(10, 108, 255, 0.14);
+}
+
+.chat-name .btn {
+  min-height: 46px;
+}
+
+.chat-replying {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 7px 8px 7px 12px;
+  border-left: 3px solid var(--blue);
+  border-radius: 12px;
+  background: rgba(10, 108, 255, 0.08);
+  font-size: 12.5px;
+}
+
+.chat-replying span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-replying button {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(127, 140, 165, 0.2);
+  color: var(--navy);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.chat-input {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.chat-input textarea {
+  min-height: 46px;
+  max-height: 140px;
+  padding: 12px 16px;
+  border-radius: 23px;
+  font-family: inherit;
+  line-height: 1.4;
+  resize: none;
+  field-sizing: content;
+}
+
+.chat-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.chat-send {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--blue-soft), var(--blue));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 20px rgba(10, 108, 255, 0.32);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 250ms var(--ease), opacity 200ms ease;
+}
+
+.chat-send svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transform: translateX(1px);
+}
+
+.chat-send:hover:not(:disabled) {
+  transform: scale(1.06) rotate(-8deg);
+}
+
+.chat-send:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.chat-under {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 7px 6px 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-under button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.chat-error {
+  color: #d92d4b;
+  font-weight: 650;
+}
+
+.chat-privacy {
+  margin: 10px 6px 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+  opacity: 0.9;
+}
+
+.footer-doctor {
+  margin-top: 8px;
+  color: var(--muted) !important;
+  font-size: 12.5px !important;
+}
+
+/* ---------- Tungi rejim ---------- */
+
+:root[data-theme="dark"] .chat-top,
+:root[data-theme="dark"] .chat-bottom {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .chat-ava {
+  border-color: #1b2233;
+  background: #273049;
+  color: #dbe4f6;
+}
+
+:root[data-theme="dark"] .chat-row:not(.is-doctor) .chat-ava-lg {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, #2a3350, #1d2439);
+  color: #c4d0ea;
+}
+
+:root[data-theme="dark"] .chat-row:not(.is-doctor) .chat-bubble {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .chat-row.is-own:not(.is-doctor) .chat-bubble {
+  background: linear-gradient(145deg, rgba(61, 139, 255, 0.24), rgba(61, 139, 255, 0.12));
+}
+
+:root[data-theme="dark"] .chat-name input,
+:root[data-theme="dark"] .chat-input textarea {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .chat-me span {
+  background: rgba(61, 139, 255, 0.2);
+  color: var(--blue-soft);
+}
+
+:root[data-theme="dark"] .chat-row:not(.is-doctor) .chat-quote {
+  background: rgba(61, 139, 255, 0.12);
+}
+
+/* ---------- Planshet va telefon ---------- */
+
+@media (max-width: 1000px) {
+  .chat-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .chat-layout .heading {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .chat-shell {
+    height: min(620px, 82vh);
+    min-height: 420px;
+    margin: 0 -4px;
+    border-radius: 28px;
+  }
+
+  .chat-top {
+    padding: 14px 16px;
+  }
+
+  .chat-me span {
+    display: none;
+  }
+
+  .chat-list {
+    padding: 14px 12px 18px;
+  }
+
+  .chat-row {
+    max-width: 94%;
+  }
+
+  .chat-bottom {
+    padding: 10px 10px 12px;
+  }
+
+  .chat-input textarea {
+    font-size: 16px; /* iPhone kattalashtirmasin */
+  }
+
+  .chat-name > div {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-row,
+  .chat-live {
+    animation: none;
+  }
+}
+
+/* Menyuda 5 ta bo'lim: tugma bir qatorda qolsin */
+.nav-cta {
+  white-space: nowrap;
+}
+
+.nav-links a {
+  padding-inline: 13px;
+}
+
+/* ---------- Shifokor kabineti ---------- */
+
+.doc-back {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.doc-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 22px;
+  padding: 24px;
+  border-radius: 32px;
+}
+
+.doc-hero > * {
+  position: relative;
+  z-index: 2;
+}
+
+.doc-hero.tone-neyro {
+  --doc-a: #3b8cff;
+  --doc-b: #0a58db;
+}
+
+.doc-hero.tone-cardio {
+  --doc-a: #ff6b7d;
+  --doc-b: #d42a4e;
+}
+
+.doc-hero-photo {
+  display: grid;
+  width: 104px;
+  height: 104px;
+  flex: none;
+  place-items: center;
+  padding: 3px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--doc-a), var(--doc-b));
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--doc-b) 35%, transparent);
+}
+
+.doc-hero-photo img,
+.doc-hero-photo span {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #e8eef8;
+  color: var(--navy);
+  font-size: 36px;
+  font-weight: 800;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.doc-hero .adm-title {
+  margin-top: 6px;
+}
+
+.doc-hero .adm-sub {
+  margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .doc-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .doc-hero-photo {
+    width: 84px;
+    height: 84px;
+  }
+}
+
+.adm-account strong {
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.adm-account .adm-hint {
+  margin-bottom: 14px;
+}
+
+/* ---------- Dizayner imzosi (eng pastda) ---------- */
+
+.design-credit {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  margin: 10px auto 0;
+  color: #8191ad;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  transition: color 250ms ease;
+}
+
+.design-credit b {
+  font-weight: 700;
+}
+
+.design-credit-tg {
+  width: 14px;
+  height: 14px;
+}
+
+.design-credit:hover {
+  color: var(--blue);
+}
+
+.design-credit:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

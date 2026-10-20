@@ -148,3 +148,71 @@ export async function removeUpload(image: string): Promise<void> {
     else await fs.unlink(path.join(UPLOAD_DIR, m[1]));
   } catch {}
 }
+
+/* ---------------- Kalit-qiymat ombori (chat va shifokor akkauntlari) ---------------- */
+// Netlify'da Blobs kalitlari, kompyuterda data/kv/ ichidagi JSON fayllar.
+// Kalitlar faqat harf, raqam, "-", "_" va "/" dan iborat bo'ladi.
+
+const KV_DIR = path.join(DATA_DIR, "kv");
+const safeKey = (key: string) => {
+  if (!/^[A-Za-z0-9_\-/]+$/.test(key) || key.includes("..")) throw new Error("Noto'g'ri kalit");
+  return key;
+};
+const kvFile = (key: string) => path.join(KV_DIR, `${safeKey(key)}.json`);
+
+export async function kvGet<T>(key: string): Promise<T | null> {
+  const store = blobs();
+  if (store) {
+    try {
+      return ((await store.get(safeKey(key), { type: "json" })) as T | null) ?? null;
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return JSON.parse(await fs.readFile(kvFile(key), "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function kvSet(key: string, value: unknown): Promise<void> {
+  const store = blobs();
+  if (store) {
+    await store.setJSON(safeKey(key), value);
+    return;
+  }
+  const file = kvFile(key);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(value), "utf8");
+  await fs.rename(tmp, file);
+}
+
+export async function kvDelete(key: string): Promise<void> {
+  const store = blobs();
+  try {
+    if (store) await store.delete(safeKey(key));
+    else await fs.unlink(kvFile(key));
+  } catch {}
+}
+
+/** Prefiks bilan boshlanadigan kalitlar, alifbo tartibida. */
+export async function kvList(prefix: string): Promise<string[]> {
+  const store = blobs();
+  if (store) {
+    const { blobs: items } = await store.list({ prefix: safeKey(prefix) });
+    return items.map((b) => b.key).sort();
+  }
+  const dir = path.join(KV_DIR, path.dirname(`${safeKey(prefix)}x`));
+  const base = path.basename(`${prefix}x`).slice(0, -1);
+  try {
+    const rel = path.relative(KV_DIR, dir).split(path.sep).join("/");
+    return (await fs.readdir(dir))
+      .filter((f) => f.endsWith(".json") && f.startsWith(base))
+      .map((f) => `${rel ? `${rel}/` : ""}${f.slice(0, -5)}`)
+      .sort();
+  } catch {
+    return [];
+  }
+}

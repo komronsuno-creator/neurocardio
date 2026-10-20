@@ -41,3 +41,17 @@ export type SiteData = {
   doctors: Doctor[];
   videos: Video[];
 };
+
+// Chatdagi xabar. Shifokor xabarida ism/rasm saytdagi joriy profildan olinadi (doctorId orqali).
+export type ChatMessage = {
+  id: string;
+  kind: "patient" | "doctor";
+  name: string;
+  doctorId?: string;
+  text: string;
+  ts: number;
+  replyTo?: { id: string; name: string; text: string };
+};
+
+// Shifokor profili: chatda ko'rsatish uchun kerakli ochiq ma'lumotlar
+export type ChatDoctor = Pick<Doctor, "id" | "name" | "role" | "image" | "accent" | "ru">;

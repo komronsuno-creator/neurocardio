@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../extra.css";
 import "../premium.css";
+import "../chat.css";
 import type { Doctor, DoctorRu, Video } from "../lib/types";
 import { parseYouTube } from "../lib/youtube";
 
@@ -76,6 +77,8 @@ export default function AdminPage() {
   // doctor form
   const [form, setForm] = useState({ ...EMPTY_DOCTOR });
   const [ru, setRu] = useState({ ...EMPTY_RU });
+  const [logins, setLogins] = useState<Record<string, string>>({});
+  const [account, setAccount] = useState({ login: "", password: "" });
   const [editId, setEditId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -91,6 +94,10 @@ export default function AdminPage() {
     const data = await api<{ doctors: Doctor[]; videos: Video[] }>("/api/content", { cache: "no-store" });
     setDoctors(data.doctors);
     setVideos(data.videos);
+    try {
+      const acc = await api<{ logins: Record<string, string> }>("/api/admin/accounts", { cache: "no-store" });
+      setLogins(acc.logins);
+    } catch {}
   }, []);
 
   // Kirganmi yoki yo'qmi
@@ -200,6 +207,7 @@ export default function AdminPage() {
   function resetForm() {
     setForm({ ...EMPTY_DOCTOR });
     setRu({ ...EMPTY_RU });
+    setAccount({ login: "", password: "" });
     setEditId(null);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -220,6 +228,7 @@ export default function AdminPage() {
       address: doctor.address ?? "",
     });
     setRu({ ...EMPTY_RU, ...(doctor.ru ?? {}) });
+    setAccount({ login: logins[doctor.id] ?? "", password: "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -248,13 +257,25 @@ export default function AdminPage() {
   function saveDoctor(event: React.FormEvent) {
     event.preventDefault();
     run(async () => {
+      let id = editId;
       if (editId) {
         await api("/api/admin/doctors", jsonInit("PUT", { ...form, ru, id: editId }));
-        notify("Shifokor ma’lumotlari saqlandi.");
       } else {
-        await api("/api/admin/doctors", jsonInit("POST", { ...form, ru }));
-        notify("Shifokor qo‘shildi.");
+        const res = await api<{ doctor: Doctor }>("/api/admin/doctors", jsonInit("POST", { ...form, ru }));
+        id = res.doctor.id;
       }
+
+      // Chat va kabinet uchun login/parol (kiritilgan bo'lsa)
+      if (id && (account.login.trim() || account.password)) {
+        try {
+          await api("/api/admin/accounts", jsonInit("PUT", { id, login: account.login, password: account.password }));
+        } catch (err) {
+          notify(`Ma’lumotlar saqlandi, lekin login saqlanmadi: ${(err as Error).message}`, true);
+          await loadContent();
+          return;
+        }
+      }
+      notify(editId ? "Shifokor ma’lumotlari saqlandi." : "Shifokor qo‘shildi.");
       resetForm();
       await loadContent();
     });
@@ -696,6 +717,39 @@ export default function AdminPage() {
                 </div>
               </details>
 
+              <div className="adm-ru adm-account">
+                <strong>Shifokor kabineti va chat uchun kirish</strong>
+                <p className="adm-hint">
+                  Shifokor <code>/doctor</code> sahifasida shu login va parol bilan kiradi: o‘z profilini o‘zgartiradi,
+                  chatda rasmi bilan javob yozadi va keraksiz xabarlarni o‘chiradi.
+                </p>
+                <div className="adm-form">
+                  <div>
+                    <label htmlFor="d-login">Login</label>
+                    <input
+                      id="d-login"
+                      placeholder="masalan: sobitjon"
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      value={account.login}
+                      onChange={(e) => setAccount((a) => ({ ...a, login: e.target.value }))}
+                      maxLength={32}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="d-pass">{editId && logins[editId] ? "Yangi parol (o‘zgartirmasangiz bo‘sh)" : "Parol"}</label>
+                    <input
+                      id="d-pass"
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Kamida 8 ta belgi"
+                      value={account.password}
+                      onChange={(e) => setAccount((a) => ({ ...a, password: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="adm-row">
                 <button className="btn btn-primary" type="submit" disabled={busy || uploading}>
                   {editId ? "Saqlash" : "Qo‘shish"}
@@ -730,6 +784,11 @@ export default function AdminPage() {
                           {doctor.role} · {doctor.phone}
                         </small>
                         {doctor.ru?.name ? <small lang="ru">RU: {doctor.ru.name}</small> : <small className="adm-missing">Ruscha matn yo‘q</small>}
+                        {logins[doctor.id] ? (
+                          <small>Kabinet logini: {logins[doctor.id]}</small>
+                        ) : (
+                          <small className="adm-missing">Kabinetga kirish berilmagan</small>
+                        )}
                       </div>
                       <div className="adm-item-actions">
                         <button type="button" className="adm-btn-soft" onClick={() => startEdit(doctor)}>

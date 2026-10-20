@@ -3,14 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import "./extra.css";
 import "./premium.css";
+import "./chat.css";
 import DoctorModal from "./doctor-modal";
+import Chat from "./chat";
 import Icon, { type IconName } from "./icons";
 import { DICT, LANG_COOKIE, doctorText, videoTitle } from "./lib/i18n";
 import type { Doctor, Lang, Video } from "./lib/types";
 
 const directionIcons: IconName[] = ["brain", "heart", "shield", "moon"];
 const trustIcons: IconName[] = ["stethoscope", "flask", "play", "send"];
-const menuIds = ["yonalishlar", "shifokorlar", "videolar", "qabul"] as const;
+const menuIds = ["yonalishlar", "shifokorlar", "videolar", "savollar", "qabul"] as const;
 
 
 // Tungi/kunduzgi rejim: oddiy JavaScript, React'ga bog'liq emas.
@@ -100,7 +102,8 @@ export default function Home({
     { href: `#${menuIds[0]}`, label: t.nav.directions },
     { href: `#${menuIds[1]}`, label: t.nav.doctors },
     { href: `#${menuIds[2]}`, label: t.nav.videos },
-    { href: `#${menuIds[3]}`, label: t.nav.contact },
+    { href: `#${menuIds[3]}`, label: t.nav.chat },
+    { href: `#${menuIds[4]}`, label: t.nav.contact },
   ];
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState("");
@@ -1145,12 +1148,26 @@ export default function Home({
         </div>
       </section>
 
+      {/* ============ SAVOL-JAVOB (CHAT) ============ */}
+      <section id="savollar" className="section section-chat">
+        <div className="container chat-layout">
+          <div className="heading reveal">
+            <span className="tag">
+              <b className="tag-num">04</b> {t.chat.tag}
+            </span>
+            <h2>{t.chat.title}</h2>
+            <p>{t.chat.text}</p>
+          </div>
+          <Chat lang={lang} doctors={doctors} />
+        </div>
+      </section>
+
       {/* ============ APPOINTMENT ============ */}
       <section id="qabul" className="section">
         <div className="container appointment-layout">
           <div className="appointment-copy reveal">
             <span className="tag">
-              <b className="tag-num">04</b> {t.contact.tag}
+              <b className="tag-num">05</b> {t.contact.tag}
             </span>
             <h2>{t.contact.title}</h2>
             <p>{t.contact.text}</p>
@@ -1247,6 +1264,9 @@ export default function Home({
             >
               <Icon name="youtube" /> YouTube ↗
             </a>
+            <a className="footer-doctor" href="/doctor">
+              {t.footer.doctorLogin} →
+            </a>
           </div>
         </div>
 
@@ -1254,6 +1274,18 @@ export default function Home({
         <div className="footer-bottom">
           © {year} NeyroCardio.uz · {t.footer.rights}
         </div>
+
+        <a
+          className="design-credit"
+          href="https://t.me/komron"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Design by @komron — Telegram"
+        >
+          <span>Design by</span>
+          <Icon name="send" className="design-credit-tg" />
+          <b>@komron</b>
+        </a>
       </footer>
 
       <DoctorModal doctor={detail} lang={lang} onClose={() => setDetail(null)} />

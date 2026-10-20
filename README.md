@@ -23,3 +23,10 @@ Shundan keyin Netlify'dagi admin paneldagi o'zgarishlar faqat Netlify'da saqlana
 ## Tillar
 - Sayt matnlari: `app/lib/i18n.ts` (o'zbekcha va ruscha).
 - Shifokorlar va videolarning ruscha matnlari: admin panelda ("Ruscha matnlar" bo'limi, video "Tahrirlash" tugmasi).
+
+## Savol-javob chati va shifokor kabineti
+- Chat bosh sahifadagi "Savollar" bo'limida. Bemor ismini kiritib yozadi.
+- Shifokor kabineti: `/doctor`. Login va parolni admin beradi: `/admin` → Shifokorlar → Tahrirlash → "Shifokor kabineti va chat uchun kirish".
+- Kabinetda shifokor o'z ma'lumotlarini (UZ/RU), rasmini va parolini o'zgartiradi.
+- Shifokor kirgan holda chatda rasmi va rangi bilan yozadi, keraksiz xabarlarni o'chiradi.
+- Ma'lumotlar Netlify'da Netlify Blobs'da, kompyuterda `data/kv/` papkasida saqlanadi (`data/kv/` GitHub'ga yuklanmaydi).

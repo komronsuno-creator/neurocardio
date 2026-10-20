@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Chat va shifokor akkauntlari (kompyuterdagi sinov ma'lumotlari)
+/data/kv/
+/data/uploads/
