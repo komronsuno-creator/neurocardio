@@ -6,6 +6,7 @@ import "../premium.css";
 import "../chat.css";
 import type { Doctor, DoctorRu, Video } from "../lib/types";
 import { parseYouTube } from "../lib/youtube";
+import TelegramPanel from "./telegram-panel";
 
 type Status = "loading" | "login" | "ready" | "unconfigured";
 type Toast = { text: string; error?: boolean } | null;
@@ -57,7 +58,7 @@ const jsonInit = (method: string, body: unknown): RequestInit => ({
 
 export default function AdminPage() {
   const [status, setStatus] = useState<Status>("loading");
-  const [tab, setTab] = useState<"videos" | "doctors">("videos");
+  const [tab, setTab] = useState<"videos" | "doctors" | "telegram">("videos");
   const [videos, setVideos] = useState<Video[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [toast, setToast] = useState<Toast>(null);
@@ -404,9 +405,20 @@ export default function AdminPage() {
           >
             Shifokorlar ({doctors.length})
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "telegram"}
+            className={`adm-tab${tab === "telegram" ? " is-active" : ""}`}
+            onClick={() => setTab("telegram")}
+          >
+            Telegram
+          </button>
         </div>
 
-        {tab === "videos" ? (
+        {tab === "telegram" ? (
+          <TelegramPanel />
+        ) : tab === "videos" ? (
           <>
             <form className="adm-card glass" onSubmit={addVideo}>
               <h2>Video qo‘shish</h2>

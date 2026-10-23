@@ -7,6 +7,7 @@ import "../extra.css";
 import "../premium.css";
 import "../chat.css";
 import type { Doctor, DoctorRu } from "../lib/types";
+import { getWebApp, tgInitData, whenTelegram } from "../lib/tg-client";
 
 type Status = "loading" | "login" | "ready";
 
@@ -67,6 +68,8 @@ export default function DoctorPage() {
   const [ru, setRu] = useState({ ...RU_FIELDS });
   const [newPassword, setNewPassword] = useState("");
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
+  const [tgInfo, setTgInfo] = useState({ linked: false, ready: false, bot: "" as string | null });
+  const [inTg, setInTg] = useState(false);
   const toastTimer = useRef(0);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -96,22 +99,67 @@ export default function DoctorPage() {
 
   async function loadMe() {
     try {
-      const data = await api<{ doctor: Doctor | null }>("/api/doctor/login", { cache: "no-store" });
+      const data = await api<{
+        doctor: Doctor | null;
+        telegramLinked?: boolean;
+        telegramReady?: boolean;
+        telegramBot?: string | null;
+      }>("/api/doctor/login", { cache: "no-store" });
       if (data.doctor) {
         fill(data.doctor);
+        setTgInfo({ linked: Boolean(data.telegramLinked), ready: Boolean(data.telegramReady), bot: data.telegramBot ?? null });
         setStatus("ready");
       } else {
         setStatus("login");
       }
+      return Boolean(data.doctor);
     } catch {
       setStatus("login");
+      return false;
     }
   }
 
   useEffect(() => {
-    loadMe();
+    let cancel = () => undefined as void;
+    loadMe().then((ok) => {
+      // Telegram ichida: Telegram'i bog'langan shifokor parolsiz kiradi
+      cancel = whenTelegram(async () => {
+        setInTg(true);
+        if (ok) return;
+        try {
+          const res = await fetch("/api/telegram/doctor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData: tgInitData() }),
+          });
+          if (res.ok) await loadMe();
+        } catch {}
+      });
+    });
+    return () => cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function linkTelegram(unlink = false) {
+    setBusy(true);
+    try {
+      await api(
+        "/api/telegram/doctor",
+        unlink ? { method: "DELETE" } : jsonInit("PUT", { initData: tgInitData() }),
+      );
+      setTgInfo((prev) => ({ ...prev, linked: !unlink }));
+      notify(
+        unlink
+          ? "Telegram uzildi. Endi xabarnomalar kelmaydi."
+          : "Telegram bog‘landi! Endi yangi savollar va qabul so‘rovlari shu yerga keladi.",
+      );
+      getWebApp()?.HapticFeedback?.impactOccurred("medium");
+    } catch (err) {
+      notify((err as Error).message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function doLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -263,6 +311,55 @@ export default function DoctorPage() {
               ko‘rinasiz, keraksiz xabarlarni “O‘chirish” tugmasi bilan olib tashlaysiz.
             </p>
           </div>
+        </div>
+
+        <div className="adm-card glass doc-tg">
+          <h2>Telegram xabarnomalari</h2>
+          {!tgInfo.ready ? (
+            <p className="adm-hint">Telegram bot hali sozlanmagan. Bu bo‘limni admin yoqadi.</p>
+          ) : tgInfo.linked ? (
+            <>
+              <p className="doc-tg-status is-on">
+                <i aria-hidden="true" /> Telegram bog‘langan
+              </p>
+              <p className="adm-hint">
+                Yangi savollar va qabul so‘rovlari Telegram’ingizga keladi. Bot orqali kirsangiz, parolsiz
+                avtomatik kirasiz.
+              </p>
+              <div className="adm-row">
+                <button className="btn btn-glass" type="button" disabled={busy} onClick={() => linkTelegram(true)}>
+                  Uzish
+                </button>
+              </div>
+            </>
+          ) : inTg ? (
+            <>
+              <p className="adm-hint">
+                Telegram akkauntingizni bog‘lang: chatga yangi savol tushganda va bemor qabulga yozilganda
+                bot sizga xabar yuboradi. Keyingi safar parolsiz kirasiz.
+              </p>
+              <div className="adm-row">
+                <button className="btn btn-primary" type="button" disabled={busy} onClick={() => linkTelegram()}>
+                  Telegram’imni bog‘lash
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="adm-hint">
+                Bog‘lash uchun shu kabinetni Telegram ichida oching: botga kiring, pastdagi
+                <b> NeyroCardio</b> tugmasini bosing, sahifa oxiridagi “Shifokorlar uchun kirish” orqali kabinetga
+                o‘ting va “Telegram’imni bog‘lash” ni bosing.
+              </p>
+              {tgInfo.bot ? (
+                <div className="adm-row">
+                  <a className="btn btn-primary" href={`https://t.me/${tgInfo.bot}`} target="_blank" rel="noopener noreferrer">
+                    @{tgInfo.bot} ni ochish ↗
+                  </a>
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
 
         <form className="adm-card glass" onSubmit={save}>

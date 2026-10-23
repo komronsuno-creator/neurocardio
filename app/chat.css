@@ -852,3 +852,193 @@
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ---------- Qabul so'rovi yuborildi ---------- */
+
+.appointment-form {
+  position: relative;
+}
+
+.appt-sent {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.8));
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  text-align: center;
+  animation: chat-in 420ms var(--ease) both;
+}
+
+.appt-sent-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #34d399, #10b981);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 26px rgba(16, 185, 129, 0.35);
+}
+
+.appt-sent-icon svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+}
+
+.appt-sent strong {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.appt-sent p {
+  max-width: 320px;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.appt-error {
+  margin: 10px 0 0;
+  color: #d92d4b;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+:root[data-theme="dark"] .appt-sent {
+  background: linear-gradient(145deg, rgba(20, 26, 44, 0.94), rgba(14, 18, 32, 0.88));
+}
+
+/* ---------- Kabinet: Telegram holati ---------- */
+
+.doc-tg-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.doc-tg-status i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+}
+
+/* ---------- Admin: Telegram ---------- */
+
+.adm-tg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 4px 0 6px;
+}
+
+.adm-tg-grid > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(127, 140, 165, 0.22);
+  border-radius: 16px;
+  background: rgba(127, 140, 165, 0.08);
+  overflow-wrap: anywhere;
+}
+
+.adm-tg-grid small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.adm-tg-grid a {
+  color: var(--blue);
+  font-weight: 750;
+}
+
+.is-ok {
+  color: #16a34a;
+}
+
+.is-warn {
+  color: #c27803;
+}
+
+.adm-tg-result {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.adm-tg-result p {
+  margin: 0;
+}
+
+.adm-tg-steps ol,
+.adm-tg-list {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.adm-tg-steps {
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .adm-tg-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Telefonda kabinet/admin yuqori paneli sig'sin */
+@media (max-width: 520px) {
+  .adm-bar {
+    padding: 6px 6px 6px 14px;
+    gap: 8px;
+  }
+
+  .adm-bar .brand {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .adm-bar-actions {
+    flex: none;
+    gap: 6px;
+  }
+
+  .adm-bar .btn {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}

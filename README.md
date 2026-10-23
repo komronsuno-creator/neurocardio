@@ -30,3 +30,12 @@ Shundan keyin Netlify'dagi admin paneldagi o'zgarishlar faqat Netlify'da saqlana
 - Kabinetda shifokor o'z ma'lumotlarini (UZ/RU), rasmini va parolini o'zgartiradi.
 - Shifokor kirgan holda chatda rasmi va rangi bilan yozadi, keraksiz xabarlarni o'chiradi.
 - Ma'lumotlar Netlify'da Netlify Blobs'da, kompyuterda `data/kv/` papkasida saqlanadi (`data/kv/` GitHub'ga yuklanmaydi).
+
+## Telegram Mini App (@neyrocardio_bot)
+1. Netlify → Environment variables → `TELEGRAM_BOT_TOKEN` = BotFather bergan token → qayta deploy.
+2. `/admin` → **Telegram** bo'limi → **Botni saytga ulash**. Webhook, menyu tugmasi, tavsiflar avtomatik o'rnatiladi.
+3. Shifokorlar: botga kirib, pastdagi **NeyroCardio** tugmasi → "Shifokorlar uchun kirish" → login/parol → **Telegram'imni bog'lash**.
+   Shundan keyin yangi savollar va qabul so'rovlari ularga Telegram'da keladi, Mini App'da parolsiz kiradi.
+- Telegram ichida: tun/kun rejimi va til Telegram'dan olinadi, chatda ism avtomatik, "Orqaga" tugmasi ishlaydi.
+- Bemor savoliga shifokor javob berganda, bemorga bot orqali xabar boradi.
+- Telegram skripti faqat sayt Telegram ichida ochilganda yuklanadi; oddiy brauzerda sayt avvalgidek ishlaydi.

@@ -13,9 +13,13 @@ import {
 } from "../../lib/chat";
 import { doctorIdFrom, tooManyAttempts } from "../../lib/doctor-auth";
 import { readData, storageError } from "../../lib/store";
+import { getDoctorLinks, html, openButton, sendMessage, siteUrlFrom, tgFullName, verifyInitData } from "../../lib/telegram";
 import type { ChatDoctor, ChatMessage } from "../../lib/types";
 
 const noStore = { "Cache-Control": "no-store" };
+
+// Saytga chiqadigan ko'rinish: Telegram ID kabi shaxsiy maydonlarsiz
+const toPublic = ({ tgUser: _tg, tgLang: _l, ...m }: ChatMessage): ChatMessage => (void _tg, void _l, m);
 const clientKey = (req: NextRequest) =>
   (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
 
@@ -45,7 +49,7 @@ export async function GET(req: NextRequest) {
     after ? Promise.resolve(undefined) : chatDoctors(),
   ]);
 
-  return Response.json({ messages, ids: recent, doctors }, { headers: noStore });
+  return Response.json({ messages: messages.map(toPublic), ids: recent, doctors }, { headers: noStore });
 }
 
 // Yangi xabar. Shifokor tizimga kirgan bo'lsa — shifokor nomidan, aks holda bemor ismi bilan.
@@ -72,17 +76,21 @@ export async function POST(req: NextRequest) {
     if (!doctor) return Response.json({ error: "Shifokor profili topilmadi." }, { status: 403 });
     msg = { id: newMessageId(), kind: "doctor", doctorId, name: doctor.name, text, ts: Date.now() };
   } else {
-    const name = typeof body.name === "string" ? body.name.replace(/\s+/g, " ").trim().slice(0, 40) : "";
+    // Telegram Mini App ichidan yozilgan bo'lsa — ism Telegram'dan, imzo bilan tasdiqlangan
+    const tg = verifyInitData(body.initData);
+    const typed = typeof body.name === "string" ? body.name.replace(/\s+/g, " ").trim().slice(0, 40) : "";
+    const name = typed || (tg ? tgFullName(tg) : "");
     if (name.length < 2) return Response.json({ error: "Ismingizni kiriting." }, { status: 400 });
     if (tooManyAttempts(`chat:${clientKey(req)}`, 6, 60 * 1000)) {
       return Response.json({ error: "Juda tez yozyapsiz. Bir daqiqadan keyin qayta urinib ko‘ring." }, { status: 429 });
     }
-    msg = { id: newMessageId(), kind: "patient", name, text, ts: Date.now() };
+    msg = { id: newMessageId(), kind: "patient", name, text, ts: Date.now(), ...(tg ? { tgUser: tg.id, tgLang: (tg.language_code ?? "").startsWith("ru") ? ("ru" as const) : ("uz" as const) } : {}) };
   }
 
   // Javob berilayotgan xabar serverda tekshiriladi (iqtibosni soxtalashtirib bo'lmaydi)
+  let original: ChatMessage | null = null;
   if (typeof body.replyTo === "string" && body.replyTo) {
-    const original = await getMessage(body.replyTo);
+    original = await getMessage(body.replyTo);
     if (original) {
       msg.replyTo = { id: original.id, name: original.name, text: original.text.slice(0, 140) };
     }
@@ -95,7 +103,32 @@ export async function POST(req: NextRequest) {
     console.error("Chat xabari saqlanmadi:", err);
     return Response.json({ error: storageError(err) }, { status: 500 });
   }
-  return Response.json({ ok: true, message: msg }, { headers: noStore });
+
+  await notify(req, msg, original);
+  return Response.json({ ok: true, message: toPublic(msg) }, { headers: noStore });
+}
+
+// Telegram xabarnomalari: yangi savol — shifokorlarga, shifokor javobi — bemorga.
+// Bot sozlanmagan bo'lsa jim o'tib ketadi.
+async function notify(req: NextRequest, msg: ChatMessage, original: ChatMessage | null) {
+  const site = siteUrlFrom(req);
+  if (!site.startsWith("https://")) return; // Telegram tugmalari faqat https bilan ishlaydi
+  const button = (text: string) => openButton(site, text, "/#savollar");
+  const short = (t: string) => html(t.length > 600 ? `${t.slice(0, 600)}…` : t);
+  const jobs: Promise<unknown>[] = [];
+
+  if (msg.kind === "patient") {
+    const links = await getDoctorLinks();
+    const text = `💬 <b>Yangi savol</b> — ${html(msg.name)}\n\n${short(msg.text)}`;
+    for (const chatId of Object.values(links)) jobs.push(sendMessage(chatId, text, button("Chatni ochish")));
+  } else if (original?.tgUser) {
+    const ru = original.tgLang === "ru";
+    const text = ru
+      ? `👨‍⚕️ <b>${html(msg.name)}</b> ответил(а) на ваш вопрос:\n\n${short(msg.text)}`
+      : `👨‍⚕️ <b>${html(msg.name)}</b> savolingizga javob berdi:\n\n${short(msg.text)}`;
+    jobs.push(sendMessage(original.tgUser, text, button(ru ? "Посмотреть ответ" : "Javobni ko‘rish")));
+  }
+  await Promise.allSettled(jobs);
 }
 
 // Xabarni o'chirish: faqat shifokorlar va admin

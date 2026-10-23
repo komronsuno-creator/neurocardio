@@ -8,6 +8,7 @@ import DoctorModal from "./doctor-modal";
 import Chat from "./chat";
 import Icon, { type IconName } from "./icons";
 import { DICT, LANG_COOKIE, doctorText, videoTitle } from "./lib/i18n";
+import { inTelegram, openExternal, tgInitData, tgUserName, whenTelegram } from "./lib/tg-client";
 import type { Doctor, Lang, Video } from "./lib/types";
 
 const directionIcons: IconName[] = ["brain", "heart", "shield", "moon"];
@@ -109,6 +110,9 @@ export default function Home({
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [year, setYear] = useState(2026);
   const [detail, setDetail] = useState<Doctor | null>(null);
+  const [appt, setAppt] = useState<"idle" | "sending" | "sent">("idle");
+  const [apptError, setApptError] = useState("");
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   // Bosh ekrandagi aylanma animatsiya aynan 2 ta shifokorga mo'ljallangan: dizayn o'zgarmasligi uchun birinchi ikkitasi ko'rsatiladi
   const heroDoctors = doctors.slice(0, 2);
@@ -525,7 +529,7 @@ export default function Home({
   // tepadan pastga tortsa yangilanadi, pastdan tepaga tortsa elastik qaytadi
   useEffect(() => {
     const touch = window.matchMedia("(pointer: coarse), (max-width: 760px)").matches;
-    if (!touch) return;
+    if (!touch || inTelegram()) return; // Telegram ichida pastga surish Telegram'ning o'ziga tegishli
 
     const shell = document.querySelector<HTMLElement>(".site-shell");
     const ptr = document.querySelector<HTMLElement>(".ptr");
@@ -730,7 +734,46 @@ export default function Home({
     document.documentElement.lang = lang;
   }, [lang]);
 
-  function handleAppointment(event: React.FormEvent<HTMLFormElement>) {
+  // Botdan "Shu shifokorga yozilish" bilan kelinganda (?doctor=id) shifokor oldindan tanlanadi
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("doctor");
+    if (id && doctors.some((d) => d.id === id)) setSelectedDoctor(id);
+  }, [doctors]);
+
+  // Telegram Mini App: til (birinchi kirishda Telegram tilidan) va ismni oldindan to'ldirish
+  useEffect(
+    () =>
+      whenTelegram((wa) => {
+        const hasCookie = document.cookie.includes(`${LANG_COOKIE}=`);
+        const code = wa.initDataUnsafe.user?.language_code ?? "";
+        if (!hasCookie && code.startsWith("ru")) changeLang("ru");
+        const input = nameInputRef.current;
+        if (input && !input.value) input.value = tgUserName();
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  // Telegram'ning "Orqaga" tugmasi: ochiq oyna yoki menyuni yopadi
+  useEffect(() => {
+    if (!inTelegram()) return;
+    const wa = window.Telegram?.WebApp;
+    if (!wa) return;
+    const open = Boolean(detail) || menuOpen;
+    const onBack = () => {
+      setDetail(null);
+      setMenuOpen(false);
+    };
+    if (open) {
+      wa.BackButton.show();
+      wa.BackButton.onClick(onBack);
+    } else {
+      wa.BackButton.hide();
+    }
+    return () => wa.BackButton.offClick(onBack);
+  }, [detail, menuOpen]);
+
+  async function handleAppointment(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const doctor = doctors.find((item) => item.id === selectedDoctor);
@@ -740,7 +783,36 @@ export default function Home({
       return;
     }
 
-    window.open(doctor.telegram, "_blank", "noopener,noreferrer");
+    const form = new FormData(event.currentTarget);
+    setAppt("sending");
+    setApptError("");
+    try {
+      const res = await fetch("/api/appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctorId: doctor.id,
+          name: form.get("name"),
+          phone: form.get("phone"),
+          initData: tgInitData(),
+        }),
+      });
+      const data = (await res.json()) as { sent?: boolean; telegram?: string; error?: string };
+      if (res.ok && data.sent) {
+        setAppt("sent");
+        return;
+      }
+      setAppt("idle");
+      if (res.ok && data.telegram) {
+        // Shifokor botga ulanmagan: avvalgidek uning Telegram sahifasi ochiladi
+        openExternal(data.telegram);
+        return;
+      }
+      setApptError(data.error || t.contact.failed);
+    } catch {
+      setAppt("idle");
+      setApptError(t.contact.failed);
+    }
   }
 
   return (
@@ -1179,8 +1251,24 @@ export default function Home({
           </div>
 
           <form className="appointment-form glass reveal" onSubmit={handleAppointment} data-glow>
+            {appt === "sent" ? (
+              <div className="appt-sent" role="status">
+                <span className="appt-sent-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m5 12.5 4.5 4.5L19 7.5" />
+                  </svg>
+                </span>
+                <strong>{t.contact.sentTitle}</strong>
+                <p>{t.contact.sentText}</p>
+                <button className="btn btn-glass" type="button" onClick={() => setAppt("idle")}>
+                  {t.contact.again}
+                </button>
+              </div>
+            ) : null}
+
             <label htmlFor="patient-name">{t.contact.name}</label>
             <input
+              ref={nameInputRef}
               id="patient-name"
               name="name"
               type="text"
@@ -1215,10 +1303,11 @@ export default function Home({
               ))}
             </select>
 
-            <button className="btn btn-primary form-submit" type="submit">
-              {t.contact.submit} <span>↗</span>
+            <button className="btn btn-primary form-submit" type="submit" disabled={appt === "sending"}>
+              {appt === "sending" ? t.contact.sending : t.contact.submit} <span>↗</span>
             </button>
 
+            {apptError ? <p className="appt-error">{apptError}</p> : null}
             <p className="form-note">{t.contact.note}</p>
           </form>
         </div>

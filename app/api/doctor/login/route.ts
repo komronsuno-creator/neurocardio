@@ -10,6 +10,7 @@ import {
 } from "../../../lib/doctor-auth";
 import { adminConfigured } from "../../../lib/auth";
 import { readData } from "../../../lib/store";
+import { botUsername, getDoctorLinks, telegramConfigured } from "../../../lib/telegram";
 
 const clientKey = (req: NextRequest) =>
   (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
@@ -18,9 +19,12 @@ const clientKey = (req: NextRequest) =>
 export async function GET(req: NextRequest) {
   const id = doctorIdFrom(req);
   if (!id) return NextResponse.json({ doctor: null }, { headers: { "Cache-Control": "no-store" } });
-  const { doctors } = await readData();
+  const [{ doctors }, links, bot] = await Promise.all([readData(), getDoctorLinks(), botUsername()]);
   const doctor = doctors.find((d) => d.id === id) ?? null;
-  return NextResponse.json({ doctor }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(
+    { doctor, telegramLinked: Boolean(links[id]), telegramReady: telegramConfigured(), telegramBot: bot },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(req: NextRequest) {

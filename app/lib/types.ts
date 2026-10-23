@@ -51,6 +51,9 @@ export type ChatMessage = {
   text: string;
   ts: number;
   replyTo?: { id: string; name: string; text: string };
+  // Faqat serverda: bemorning Telegram ID si (javob kelganda xabar yuborish uchun). Saytga chiqarilmaydi.
+  tgUser?: number;
+  tgLang?: "uz" | "ru";
 };
 
 // Shifokor profili: chatda ko'rsatish uchun kerakli ochiq ma'lumotlar

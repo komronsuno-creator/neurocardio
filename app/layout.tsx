@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import TelegramBridge from "./telegram-bridge";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,10 +56,18 @@ export default function RootLayout({
             __html: `try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t;if(sessionStorage.getItem("nc_intro"))document.documentElement.classList.add("no-intro");var l=document.cookie.match(/(?:^|; )lang=(uz|ru)/);if(l)document.documentElement.lang=l[1]}catch(e){}`,
           }}
         />
+
+        {/* Telegram Mini App: sayt Telegram ichida ochilganda Telegram skriptini yuklaydi (oddiy brauzerda yuklanmaydi) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var d=document.documentElement;if(/tgWebApp/.test(location.hash)||sessionStorage.getItem("nc_tg")){sessionStorage.setItem("nc_tg","1");d.classList.add("in-tg","no-intro");var s=document.createElement("script");s.src="https://telegram.org/js/telegram-web-app.js";document.head.appendChild(s)}}catch(e){}`,
+          }}
+        />
       </head>
 
       <body className="min-h-full flex flex-col">
         {children}
+        <TelegramBridge />
 
         {/* Google AdSense */}
         <Script

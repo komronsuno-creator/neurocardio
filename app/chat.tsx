@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DICT, doctorText } from "./lib/i18n";
 import type { ChatDoctor, ChatMessage, Doctor, Lang } from "./lib/types";
+import { getWebApp, tgInitData, tgUserName, whenTelegram } from "./lib/tg-client";
 
 const POLL_MS = 4000;
 const NAME_KEY = "nc_chat_name";
@@ -50,6 +51,8 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
   const [error, setError] = useState("");
   const [confirmId, setConfirmId] = useState("");
   const [mine, setMine] = useState<string[]>([]);
+  const [tgName, setTgName] = useState("");
+  const askedWriteRef = useRef(false);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -76,11 +79,30 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
       const res = await fetch("/api/doctor/login", { cache: "no-store" });
       const data = (await res.json()) as { doctor: Doctor | null };
       setMe(data.doctor);
-    } catch {}
+      return data.doctor;
+    } catch {
+      return null;
+    }
   }, []);
 
   useEffect(() => {
-    loadMe();
+    let cancel = () => undefined as void;
+    loadMe().then((doctor) => {
+      // Telegram Mini App: ism Telegram'dan; shifokorning Telegram'i bog'langan bo'lsa — parolsiz kiradi
+      cancel = whenTelegram(async () => {
+        setTgName(tgUserName());
+        if (doctor) return;
+        try {
+          const res = await fetch("/api/telegram/doctor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData: tgInitData() }),
+          });
+          if (res.ok) await loadMe();
+        } catch {}
+      });
+    });
+    return () => cancel();
   }, [loadMe]);
 
   // Yangi xabarlarni olish
@@ -171,6 +193,16 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
     event?.preventDefault();
     const body = text.trim();
     if (!body || sending) return;
+
+    // Telegram'da birinchi xabardan oldin: bot shifokor javobini yubora olishi uchun ruxsat so'raladi
+    const wa = getWebApp();
+    if (wa && !askedWriteRef.current && !wa.initDataUnsafe.user?.allows_write_to_pm && !me) {
+      askedWriteRef.current = true;
+      try {
+        if (wa.isVersionAtLeast("6.9")) wa.requestWriteAccess?.();
+      } catch {}
+    }
+
     setSending(true);
     setError("");
     try {
@@ -178,7 +210,8 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          name: name || tgName,
+          initData: tgInitData(),
           text: body,
           replyTo: replyTo?.id ?? "",
           website: honeypotRef.current?.value ?? "",
@@ -235,7 +268,7 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
   const time = (ts: number) =>
     new Date(ts).toLocaleTimeString(lang === "ru" ? "ru-RU" : "uz-UZ", { hour: "2-digit", minute: "2-digit" });
 
-  const canWrite = Boolean(me) || (Boolean(name) && !editingName);
+  const canWrite = Boolean(me) || (Boolean(name || tgName) && !editingName);
   const mineSet = new Set(mine);
 
   let lastDay = "";
@@ -424,7 +457,7 @@ export default function Chat({ lang, doctors: initialDoctors }: { lang: Lang; do
             <div className="chat-under">
               {me ? null : (
                 <span>
-                  {t.asName} <b>{name}</b>{" "}
+                  {t.asName} <b>{name || tgName}</b>{" "}
                   <button type="button" onClick={() => setEditingName(true)}>
                     {t.changeName}
                   </button>
