@@ -49,7 +49,7 @@ type UserState = {
   apptName?: string;
   apptPhone?: string;
   replyTo?: number; // shifokor uchun: hozir kimga javob yozyapti
-  kb?: boolean; // pastki menyu yuborilganmi
+  kb?: boolean | number; // pastki menyu qaysi versiyasi yuborilgan
   blockedBy?: string[]; // bu bemorni bloklagan shifokorlar
   name?: string;
   username?: string;
@@ -70,6 +70,11 @@ const T = {
     btnVideos: "🎥 Videolar",
     btnSite: "🌐 Sayt",
     btnContacts: "ℹ️ Aloqa",
+    btnLocation: "📍 Manzil",
+    locTitle: "NeyroCardio — qabul manzili",
+    locAddress: "Toshkent sh. · xaritada ko‘rish uchun bosing",
+    locText: "📍 <b>Qabul manzili</b>\n\nYo‘nalish olish uchun quyidagi xaritalardan birini tanlang 👇",
+    btnRoute: "🧭 Yo‘l ko‘rsatish",
     btnLang: "🌍 Русский",
     btnBack: "« Orqaga",
     btnHome: "🏠 Menyu",
@@ -144,6 +149,11 @@ const T = {
     btnVideos: "🎥 Видео",
     btnSite: "🌐 Сайт",
     btnContacts: "ℹ️ Контакты",
+    btnLocation: "📍 Адрес",
+    locTitle: "NeyroCardio — адрес приёма",
+    locAddress: "г. Ташкент · нажмите, чтобы открыть карту",
+    locText: "📍 <b>Адрес приёма</b>\n\nВыберите карту, чтобы построить маршрут 👇",
+    btnRoute: "🧭 Построить маршрут",
     btnLang: "🌍 O‘zbekcha",
     btnBack: "« Назад",
     btnHome: "🏠 Меню",
@@ -231,6 +241,9 @@ const dName = (d: Doctor, l: Lang) => doctorText(d, "name", l);
 const dRole = (d: Doctor, l: Lang) => doctorText(d, "role", l);
 const webApp = (site: string, path: string) => ({ url: new URL(path, site).toString() });
 
+// Pastki menyu versiyasi: o'zgarsa, eski foydalanuvchilarga /start da yangisi yuboriladi
+const KB_VER = 2;
+
 const send = (chatId: number, text: string, markup?: unknown, extra: Record<string, unknown> = {}) =>
   tgApi<{ message_id: number }>("sendMessage", {
     chat_id: chatId,
@@ -252,7 +265,7 @@ function bottomKeyboard(site: string, t: Dict) {
       [{ text: t.btnDoctors }, { text: t.btnWrite }],
       [{ text: t.btnBook }, { text: t.btnVideos }],
       [{ text: t.btnSite, web_app: webApp(site, "/") }, { text: t.btnContacts }],
-      [{ text: t.btnLang }],
+      [{ text: t.btnLocation }, { text: t.btnLang }],
     ],
     resize_keyboard: true,
     is_persistent: true,
@@ -279,6 +292,7 @@ function mainInline(site: string, t: Dict) {
         { text: t.btnVideos, callback_data: "videos" },
         { text: t.btnSite, web_app: webApp(site, "/") },
       ],
+      [{ text: t.btnLocation, callback_data: "loc" }],
     ],
   };
 }
@@ -544,13 +558,40 @@ async function showVideos(chatId: number, l: Lang, t: Dict, site: string) {
   return send(chatId, t.videosTitle, { inline_keyboard: rows });
 }
 
+/* ============================ Manzil ============================ */
+// Qabul joyi: 41°21'05.6"N 69°12'46.6"E
+export const CLINIC = { lat: 41.351556, lng: 69.212944 };
+
+async function showLocation(chatId: number, t: Dict) {
+  const { lat, lng } = CLINIC;
+  await tgApi("sendVenue", {
+    chat_id: chatId,
+    latitude: lat,
+    longitude: lng,
+    title: t.locTitle,
+    address: t.locAddress,
+  });
+  return send(chatId, t.locText, {
+    inline_keyboard: [
+      [
+        { text: "🗺 Google Maps", url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}` },
+        { text: "🗺 Yandex", url: `https://yandex.uz/maps/?pt=${lng},${lat}&z=17&l=map` },
+      ],
+      [{ text: t.btnRoute, url: `https://yandex.uz/maps/?rtext=~${lat},${lng}&rtt=auto` }],
+    ],
+  });
+}
+
 async function showContacts(chatId: number, l: Lang, t: Dict) {
   const { doctors } = await readData();
   const lines = doctors
     .map((d) => `${icon(d)} <b>${html(dName(d, l))}</b> — ${html(dRole(d, l))}\n📞 ${html(d.phone)}`)
     .join("\n\n");
   return send(chatId, t.contacts(lines), {
-    inline_keyboard: doctors.map((d) => [{ text: `✍️ ${dName(d, l)}`, callback_data: `chat:${d.id}` }]),
+    inline_keyboard: [
+      ...doctors.map((d) => [{ text: `✍️ ${dName(d, l)}`, callback_data: `chat:${d.id}` }]),
+      [{ text: t.btnLocation, callback_data: "loc" }],
+    ],
   });
 }
 
@@ -609,9 +650,9 @@ export async function handleUpdate(update: TgUpdate, site: string) {
     const fresh: UserState = { ...u, lang: l, mode: "idle", step: undefined };
     await saveUser(from.id, fresh);
     await sendWelcome(m.chat.id, site, t.hello(html(from.first_name ?? "")), mainInline(site, t));
-    if (!u.kb) {
+    if (u.kb !== KB_VER) {
       await send(m.chat.id, t.kbHint, bottomKeyboard(site, t));
-      await saveUser(from.id, { ...fresh, kb: true });
+      await saveUser(from.id, { ...fresh, kb: KB_VER });
     }
     const d = doctors.find((x) => `doc_${x.id}` === payload);
     if (d) return show(m.chat.id, undefined, { type: "photo", media: new URL(d.image || "/icon.png", site).toString() }, doctorCaption(d, l, t), doctorCardKb(d, t));
@@ -655,6 +696,7 @@ export async function handleUpdate(update: TgUpdate, site: string) {
   if (is("btnBook") || text === "/book") return send(m.chat.id, t.chooseForBook, doctorList(doctors, l, "book", t));
   if (is("btnVideos") || text === "/videos") return showVideos(m.chat.id, l, t, site);
   if (is("btnContacts") || text === "/contacts") return showContacts(m.chat.id, l, t);
+  if (is("btnLocation") || text === "/location") return showLocation(m.chat.id, t);
   if (text === "/stop") {
     await saveUser(from.id, { ...u, mode: "idle" });
     return send(m.chat.id, t.chatEnded, bottomKeyboard(site, t));
@@ -704,6 +746,8 @@ async function onCallback(cb: NonNullable<TgUpdate["callback_query"]>, site: str
       return show(chatId, messageId, await anim(), t.chooseForBook, doctorList(doctors, l, "book", t));
     case "videos":
       return showVideos(chatId, l, t, site);
+    case "loc":
+      return showLocation(chatId, t);
     case "doc":
       if (!d) return;
       return show(
