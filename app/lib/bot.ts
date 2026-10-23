@@ -71,9 +71,9 @@ const T = {
     btnSite: "🌐 Sayt",
     btnContacts: "ℹ️ Aloqa",
     btnLocation: "📍 Manzil",
-    locTitle: "NeyroCardio — qabul manzili",
-    locAddress: "Toshkent sh. · xaritada ko‘rish uchun bosing",
-    locText: "📍 <b>Qabul manzili</b>\n\nYo‘nalish olish uchun quyidagi xaritalardan birini tanlang 👇",
+    locTitle: "Real Medical klinikasi — NeyroCardio",
+    locAddress: "Toshkent sh., Olmazor tumani, Talabalar ko‘chasi",
+    locText: "📍 <b>Qabul manzili</b>\n\n🏥 <b>Real Medical</b> klinikasi\nToshkent shahar, Olmazor tumani, Talabalar ko‘chasi\n\nYo‘nalish olish uchun xaritani tanlang 👇",
     btnRoute: "🧭 Yo‘l ko‘rsatish",
     btnLang: "🌍 Русский",
     btnBack: "« Orqaga",
@@ -116,7 +116,7 @@ const T = {
     cancelled: "Bekor qilindi.",
     videosTitle: "🎥 <b>Foydali videolar</b>\n\nTanlang — YouTube’da ochiladi:",
     contacts: (lines: string) =>
-      `ℹ️ <b>NeyroCardio</b>\n\n${lines}\n\n🌐 neyrocardio.uz\n▶️ YouTube: @Neurocardiouz\n\n<i>Shoshilinch holatda — 103</i>`,
+      `ℹ️ <b>NeyroCardio</b>\n\n${lines}\n\n📍 Real Medical klinikasi — Toshkent, Olmazor tumani, Talabalar ko‘chasi\n🌐 neyrocardio.uz\n▶️ YouTube: @Neurocardiouz\n\n<i>Shoshilinch holatda — 103</i>`,
     langSet: "Til: O‘zbekcha ✅",
     // Shifokor tomoni
     docHello: (d: string) =>
@@ -150,9 +150,9 @@ const T = {
     btnSite: "🌐 Сайт",
     btnContacts: "ℹ️ Контакты",
     btnLocation: "📍 Адрес",
-    locTitle: "NeyroCardio — адрес приёма",
-    locAddress: "г. Ташкент · нажмите, чтобы открыть карту",
-    locText: "📍 <b>Адрес приёма</b>\n\nВыберите карту, чтобы построить маршрут 👇",
+    locTitle: "Клиника Real Medical — NeyroCardio",
+    locAddress: "г. Ташкент, Алмазарский р-н, ул. Талабалар",
+    locText: "📍 <b>Адрес приёма</b>\n\n🏥 Клиника <b>Real Medical</b>\nг. Ташкент, Алмазарский район, ул. Талабалар\n\nВыберите карту, чтобы построить маршрут 👇",
     btnRoute: "🧭 Построить маршрут",
     btnLang: "🌍 O‘zbekcha",
     btnBack: "« Назад",
@@ -193,7 +193,7 @@ const T = {
     cancelled: "Отменено.",
     videosTitle: "🎥 <b>Полезные видео</b>\n\nВыберите — откроется в YouTube:",
     contacts: (lines: string) =>
-      `ℹ️ <b>NeyroCardio</b>\n\n${lines}\n\n🌐 neyrocardio.uz\n▶️ YouTube: @Neurocardiouz\n\n<i>В экстренном случае — 103</i>`,
+      `ℹ️ <b>NeyroCardio</b>\n\n${lines}\n\n📍 Клиника Real Medical — Ташкент, Алмазарский р-н, ул. Талабалар\n🌐 neyrocardio.uz\n▶️ YouTube: @Neurocardiouz\n\n<i>В экстренном случае — 103</i>`,
     langSet: "Язык: Русский ✅",
     docHello: (d: string) =>
       `👨‍⚕️ Добро пожаловать, <b>${d}</b>!\n\nСообщения пациентов приходят сюда. Чтобы ответить — сделайте <b>Reply</b> на сообщение пациента или нажмите «✍️ Ответить».`,
