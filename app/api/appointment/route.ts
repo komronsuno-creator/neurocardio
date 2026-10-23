@@ -2,7 +2,7 @@
 // Bog'lanmagan bo'lsa — mijoz avvalgidek shifokorning Telegram sahifasini ochadi.
 import { NextRequest } from "next/server";
 import { tooManyAttempts } from "../../lib/doctor-auth";
-import { readData } from "../../lib/store";
+import { kvGet, kvSet, readData } from "../../lib/store";
 import { getDoctorLinks, html, sendMessage, tgFullName, verifyInitData } from "../../lib/telegram";
 
 const clientKey = (req: NextRequest) =>
@@ -35,7 +35,13 @@ export async function POST(req: NextRequest) {
   const lines = ["🩺 <b>Yangi qabul so‘rovi</b> (NeyroCardio)", "", `👤 ${html(name)}`, `📞 ${html(phone)}`];
   if (tg) lines.push(`✈️ Telegram: ${tg.username ? `@${html(tg.username)}` : html(tgFullName(tg))}`);
   lines.push("", "Bemor bilan bog‘lanib, qabul vaqtini kelishib oling.");
-  const markup = tg?.username ? { inline_keyboard: [[{ text: "Bemorga yozish", url: `https://t.me/${tg.username}` }]] } : undefined;
+  // Telegram orqali kelgan bo'lsa — shifokor bot ichidan bemorga javob yoza oladi
+  const markup = tg ? { inline_keyboard: [[{ text: "✍️ Bemorga yozish (bot orqali)", callback_data: `r:${tg.id}` }]] } : undefined;
+  if (tg) {
+    const key = `tg/u/${tg.id}`;
+    const prev = (await kvGet<Record<string, unknown>>(key)) ?? {};
+    await kvSet(key, { ...prev, name: name, username: tg.username }).catch(() => undefined);
+  }
 
   const sent = await sendMessage(chatId, lines.join("\n"), markup);
   return Response.json(sent ? { sent: true } : { sent: false, telegram: doctor.telegram });

@@ -63,10 +63,28 @@ export async function POST(req: NextRequest) {
     menu_button: { type: "web_app", text: "NeyroCardio", web_app: { url: `${site}/` } },
   });
   await run("Buyruqlar (UZ)", "setMyCommands", {
-    commands: [{ command: "start", description: "NeyroCardio’ni ochish" }],
+    commands: [
+      { command: "start", description: "Bosh menyu" },
+      { command: "ask", description: "Shifokorga yozish" },
+      { command: "book", description: "Qabulga yozilish" },
+      { command: "doctors", description: "Shifokorlar" },
+      { command: "videos", description: "Foydali videolar" },
+      { command: "contacts", description: "Aloqa" },
+      { command: "lang", description: "Tilni almashtirish / Сменить язык" },
+      { command: "stop", description: "Suhbatni tugatish" },
+    ],
   });
   await run("Buyruqlar (RU)", "setMyCommands", {
-    commands: [{ command: "start", description: "Открыть NeyroCardio" }],
+    commands: [
+      { command: "start", description: "Главное меню" },
+      { command: "ask", description: "Написать врачу" },
+      { command: "book", description: "Записаться на приём" },
+      { command: "doctors", description: "Врачи" },
+      { command: "videos", description: "Полезные видео" },
+      { command: "contacts", description: "Контакты" },
+      { command: "lang", description: "Сменить язык / Tilni almashtirish" },
+      { command: "stop", description: "Завершить чат" },
+    ],
     language_code: "ru",
   });
   await run("Qisqa tavsif (UZ)", "setMyShortDescription", {

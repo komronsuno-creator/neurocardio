@@ -140,6 +140,20 @@ export default function DoctorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Bot orqali bog'lash: bir martalik havola ochiladi, botda Start bosiladi
+  async function linkViaBot() {
+    setBusy(true);
+    try {
+      const res = await api<{ url: string }>("/api/doctor/telegram-link", { method: "POST" });
+      window.location.href = res.url;
+      notify("Telegram ochilmoqda… Botda Start ni bosing, so‘ng shu sahifani yangilang.");
+    } catch (err) {
+      notify((err as Error).message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function linkTelegram(unlink = false) {
     setBusy(true);
     try {
@@ -347,17 +361,15 @@ export default function DoctorPage() {
           ) : (
             <>
               <p className="adm-hint">
-                Bog‘lash uchun shu kabinetni Telegram ichida oching: botga kiring, pastdagi
-                <b> NeyroCardio</b> tugmasini bosing, sahifa oxiridagi “Shifokorlar uchun kirish” orqali kabinetga
-                o‘ting va “Telegram’imni bog‘lash” ni bosing.
+                Tugmani bosing — Telegram ochiladi, botda <b>Start</b> ni bosing. Shundan keyin bemorlar bot orqali
+                yozgan xabarlar va qabul so‘rovlari to‘g‘ridan-to‘g‘ri Telegram’ingizga keladi, javobni ham
+                o‘sha yerda yozasiz.
               </p>
-              {tgInfo.bot ? (
-                <div className="adm-row">
-                  <a className="btn btn-primary" href={`https://t.me/${tgInfo.bot}`} target="_blank" rel="noopener noreferrer">
-                    @{tgInfo.bot} ni ochish ↗
-                  </a>
-                </div>
-              ) : null}
+              <div className="adm-row">
+                <button className="btn btn-primary" type="button" disabled={busy} onClick={linkViaBot}>
+                  Telegram orqali bog‘lash ↗
+                </button>
+              </div>
             </>
           )}
         </div>
