@@ -17,6 +17,7 @@ const EMPTY_DOCTOR = {
   description: "",
   phone: "",
   telegram: "",
+  instagram: "",
   image: "",
   bio: "",
   experience: "",
@@ -221,6 +222,7 @@ export default function AdminPage() {
       description: doctor.description,
       phone: doctor.phone,
       telegram: doctor.telegram,
+      instagram: doctor.instagram ? "@" + doctor.instagram.replace(/^https:\/\/instagram\.com\//, "") : "",
       image: doctor.image,
       bio: doctor.bio ?? "",
       experience: doctor.experience ?? "",
@@ -614,6 +616,15 @@ export default function AdminPage() {
                     value={form.telegram}
                     onChange={setField("telegram")}
                     required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="d-ig">Instagram</label>
+                  <input
+                    id="d-ig"
+                    placeholder="@username"
+                    value={form.instagram}
+                    onChange={setField("instagram")}
                   />
                 </div>
 

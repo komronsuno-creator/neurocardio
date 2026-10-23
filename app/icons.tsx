@@ -8,7 +8,9 @@ export type IconName =
   | "flask"
   | "play"
   | "send"
-  | "youtube";
+  | "youtube"
+  | "instagram"
+  | "bot";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   brain: (
@@ -59,6 +61,22 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M20.5 4 3.8 10.6c-.8.3-.8 1.4 0 1.7l4.2 1.5 1.6 5.1c.2.7 1.1.9 1.6.4l2.4-2.3 4.3 3.1c.6.4 1.4.1 1.6-.6L21.6 5.2c.2-.8-.5-1.5-1.1-1.2Z" />
       <path d="m8 13.8 9-6.3-6.4 7.4" />
+    </>
+  ),
+  instagram: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="3.9" />
+      <circle cx="17.2" cy="6.8" r=".6" fill="currentColor" />
+    </>
+  ),
+  bot: (
+    <>
+      <rect x="4" y="7.5" width="16" height="11.5" rx="4" />
+      <path d="M12 7.5V4.5M10.5 4h3" />
+      <circle cx="9" cy="13" r="1.2" fill="currentColor" />
+      <circle cx="15" cy="13" r="1.2" fill="currentColor" />
+      <path d="M2.5 12v3M21.5 12v3" />
     </>
   ),
   youtube: (

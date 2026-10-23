@@ -7,6 +7,7 @@ import "./chat.css";
 import DoctorModal from "./doctor-modal";
 import Chat from "./chat";
 import Icon, { type IconName } from "./icons";
+import { botLink } from "./lib/bot-link";
 import { DICT, LANG_COOKIE, doctorText, videoTitle } from "./lib/i18n";
 import { inTelegram, openExternal, tgInitData, tgUserName, whenTelegram } from "./lib/tg-client";
 import type { Doctor, Lang, Video } from "./lib/types";
@@ -98,6 +99,9 @@ export default function Home({
   initialLang?: Lang;
 }) {
   const [lang, setLang] = useState<Lang>(initialLang);
+  // Telegram Mini App ichida "botga o'tish" tugmasi kerak emas (foydalanuvchi allaqachon botda)
+  const [inTg, setInTg] = useState(false);
+  useEffect(() => setInTg(inTelegram()), []);
   const t = DICT[lang];
   const menuLinks = [
     { href: `#${menuIds[0]}`, label: t.nav.directions },
@@ -1148,6 +1152,18 @@ export default function Home({
                     <a className="phone-link" href={`tel:${doctor.phone}`}>
                       ☎ {t.doctors.call}
                     </a>
+                    {doctor.instagram ? (
+                      <a
+                        className="ig-link"
+                        href={doctor.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Instagram — ${doctorText(doctor, "name", lang)}`}
+                        title={`@${doctor.instagram.split("/").pop()}`}
+                      >
+                        <Icon name="instagram" />
+                      </a>
+                    ) : null}
                     <button
                       type="button"
                       className="btn btn-glass"
@@ -1309,6 +1325,9 @@ export default function Home({
 
             {apptError ? <p className="appt-error">{apptError}</p> : null}
             <p className="form-note">{t.contact.note}</p>
+            <a className="appt-bot" href={botLink(selectedDoctor ? `doc_${selectedDoctor}` : "book")} target="_blank" rel="noopener noreferrer">
+              <Icon name="send" /> {t.contact.viaBot} <b>@neyrocardio_bot</b>
+            </a>
           </form>
         </div>
       </section>
@@ -1336,7 +1355,7 @@ export default function Home({
           <div className="footer-col">
             <h4>{t.footer.doctors}</h4>
             {doctors.map((doctor) => (
-              <a key={doctor.id} href={doctor.telegram} target="_blank" rel="noopener noreferrer">
+              <a key={doctor.id} href={doctor.instagram || doctor.telegram} target="_blank" rel="noopener noreferrer">
                 {doctorText(doctor, "name", lang)}
                 <small>{doctorText(doctor, "role", lang)}</small>
               </a>
@@ -1352,6 +1371,9 @@ export default function Home({
               rel="noopener noreferrer"
             >
               <Icon name="youtube" /> YouTube ↗
+            </a>
+            <a className="footer-social" href={botLink()} target="_blank" rel="noopener noreferrer">
+              <Icon name="send" /> {t.bot.footer} ↗
             </a>
             <a className="footer-doctor" href="/doctor">
               {t.footer.doctorLogin} →
@@ -1378,6 +1400,24 @@ export default function Home({
       </footer>
 
       <DoctorModal doctor={detail} lang={lang} onClose={() => setDetail(null)} />
+
+      {inTg ? null : (
+        <a
+          className="bot-fab"
+          href={botLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${t.bot.fab} — @neyrocardio_bot`}
+        >
+          <span className="bot-fab-icon">
+            <Icon name="send" />
+          </span>
+          <span className="bot-fab-text">
+            <b>{t.bot.fab}</b>
+            <small>{t.bot.fabHint}</small>
+          </span>
+        </a>
+      )}
 
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
     </main>

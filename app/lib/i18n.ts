@@ -56,6 +56,7 @@ const uz = {
     text: "Mutaxassislar bilan bog‘laning va o‘zingizga kerakli ma’lumotni oling.",
     call: "Qo‘ng‘iroq",
     more: "Batafsil",
+    writeBot: "Bot orqali yozish",
   },
   videos: {
     tag: "VIDEO KUTUBXONASI",
@@ -113,6 +114,12 @@ const uz = {
     sentText: "Shifokor tez orada siz bilan telefon yoki Telegram orqali bog‘lanadi.",
     again: "Yana so‘rov yuborish",
     failed: "So‘rovni yuborib bo‘lmadi. Qayta urinib ko‘ring.",
+    viaBot: "yoki Telegram bot orqali yoziling",
+  },
+  bot: {
+    fab: "Telegram bot",
+    fabHint: "Shifokorga yozish · Qabul",
+    footer: "Telegram bot",
   },
   footer: {
     tagline: "Nevrologiya va kardiologiya haqida shifokorlardan ishonchli ma’lumotlar.",
@@ -187,6 +194,7 @@ const ru: Dict = {
     text: "Свяжитесь со специалистом и получите нужную вам информацию.",
     call: "Позвонить",
     more: "Подробнее",
+    writeBot: "Написать через бот",
   },
   videos: {
     tag: "ВИДЕОТЕКА",
@@ -244,6 +252,12 @@ const ru: Dict = {
     sentText: "Врач скоро свяжется с вами по телефону или в Telegram.",
     again: "Отправить ещё одну заявку",
     failed: "Не удалось отправить заявку. Попробуйте ещё раз.",
+    viaBot: "или запишитесь через Telegram-бот",
+  },
+  bot: {
+    fab: "Telegram-бот",
+    fabHint: "Написать врачу · Запись",
+    footer: "Telegram-бот",
   },
   footer: {
     tagline: "Достоверная информация о неврологии и кардиологии от практикующих врачей.",

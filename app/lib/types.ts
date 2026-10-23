@@ -20,6 +20,7 @@ export type Doctor = {
   image: string;
   phone: string;
   telegram: string;
+  instagram?: string; // https://instagram.com/username
   accent: "neyro" | "cardio";
   // "Batafsil" oynasida ko'rinadigan ma'lumotlar (hammasi ixtiyoriy)
   bio?: string;

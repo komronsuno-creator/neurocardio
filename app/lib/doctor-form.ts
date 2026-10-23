@@ -17,6 +17,23 @@ function normTelegram(value: string): string | null {
   return null;
 }
 
+// Instagram: @username, username yoki instagram.com/username -> https://instagram.com/username
+export function normInstagram(value: string): string | null {
+  let s = value.trim();
+  if (!s) return "";
+  if (s.startsWith("@")) s = s.slice(1);
+  if (/^[A-Za-z0-9._]{1,30}$/.test(s)) return `https://instagram.com/${s}`;
+  try {
+    const u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
+    const host = u.hostname.toLowerCase().replace(/^www\./, "");
+    const name = u.pathname.split("/").filter(Boolean)[0] ?? "";
+    if ((host === "instagram.com" || host === "instagr.am") && /^[A-Za-z0-9._]{1,30}$/.test(name)) {
+      return `https://instagram.com/${name}`;
+    }
+  } catch {}
+  return null;
+}
+
 function normPhone(value: string): string | null {
   const s = value.replace(/[\s()-]/g, "");
   if (!/^\+?\d{9,15}$/.test(s)) return null;
@@ -66,6 +83,9 @@ export function parseDoctor(body: Record<string, unknown>): Parsed {
   const telegram = normTelegram(str(body.telegram, 200));
   if (!telegram) return { ok: false, error: "Telegram manzili noto‘g‘ri (masalan @username yoki https://t.me/username)." };
 
+  const instagram = normInstagram(str(body.instagram, 200));
+  if (instagram === null) return { ok: false, error: "Instagram manzili noto‘g‘ri (masalan @username)." };
+
   const image = normImage(str(body.image, 300));
   if (image === null) return { ok: false, error: "Rasm manzili noto‘g‘ri." };
 
@@ -78,6 +98,7 @@ export function parseDoctor(body: Record<string, unknown>): Parsed {
       image,
       phone,
       telegram,
+      instagram,
       bio: str(body.bio, 3000),
       experience: str(body.experience, 120),
       education: str(body.education, 400),

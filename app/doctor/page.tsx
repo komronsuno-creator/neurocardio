@@ -17,6 +17,7 @@ const FIELDS = {
   description: "",
   phone: "",
   telegram: "",
+  instagram: "",
   image: "",
   bio: "",
   experience: "",
@@ -87,6 +88,7 @@ export default function DoctorPage() {
       description: d.description,
       phone: d.phone,
       telegram: d.telegram,
+      instagram: d.instagram ? "@" + d.instagram.replace(/^https:\/\/instagram\.com\//, "") : "",
       image: d.image,
       bio: d.bio ?? "",
       experience: d.experience ?? "",
@@ -396,6 +398,10 @@ export default function DoctorPage() {
             <div>
               <label htmlFor="p-tg">Telegram *</label>
               <input id="p-tg" value={form.telegram} onChange={setField("telegram")} required />
+            </div>
+            <div>
+              <label htmlFor="p-ig">Instagram</label>
+              <input id="p-ig" placeholder="@username" value={form.instagram} onChange={setField("instagram")} />
             </div>
             <div className="adm-full">
               <label htmlFor="p-img">Rasm (JPG, PNG yoki WEBP, 5 MB gacha)</label>

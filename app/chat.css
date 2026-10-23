@@ -1042,3 +1042,135 @@
     white-space: nowrap;
   }
 }
+
+/* ============ TELEGRAM BOTGA KIRISH (sayt ichidan) ============ */
+
+.bot-fab {
+  position: fixed;
+  z-index: 120;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px 7px 7px;
+  border-radius: 999px;
+  color: var(--text, #0b1a33);
+  text-decoration: none;
+  background:
+    radial-gradient(140% 100% at 0% 0%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    0 14px 34px -12px rgba(10, 60, 140, 0.45);
+  animation: botFabIn 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.2) 1.6s both;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.bot-fab:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    0 18px 40px -12px rgba(10, 60, 140, 0.55);
+}
+.bot-fab-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(160deg, #3fb5ff, #0a6cff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 16px -6px rgba(10, 108, 255, 0.8);
+}
+.bot-fab-icon .ico {
+  width: 21px;
+  height: 21px;
+  margin-left: -2px;
+}
+.bot-fab-icon::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(10, 108, 255, 0.45);
+  animation: botFabPulse 2.6s ease-out infinite;
+}
+.bot-fab-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.bot-fab-text b {
+  font-size: 14px;
+  font-weight: 800;
+}
+.bot-fab-text small {
+  font-size: 11px;
+  opacity: 0.65;
+}
+:root[data-theme="dark"] .bot-fab {
+  color: #eef4ff;
+  background:
+    radial-gradient(140% 100% at 0% 0%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.25),
+    0 14px 34px -12px rgba(0, 0, 0, 0.7);
+}
+@keyframes botFabIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes botFabPulse {
+  0% { opacity: 0.9; transform: scale(0.9); }
+  70%, 100% { opacity: 0; transform: scale(1.35); }
+}
+@media (max-width: 640px) {
+  .bot-fab { padding: 6px; }
+  .bot-fab-text { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bot-fab, .bot-fab-icon::after { animation: none; }
+}
+
+/* Shifokor kartasidagi Instagram belgisi */
+.ig-link {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #d6249f;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 0.2s ease;
+}
+.ig-link:hover { transform: scale(1.08); }
+.ig-link .ico { width: 20px; height: 20px; }
+:root[data-theme="dark"] .ig-link {
+  color: #ff6fb5;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.detail-actions .btn .ico { width: 18px; height: 18px; margin-right: 4px; vertical-align: -3px; }
+
+/* Qabul formasi ostidagi bot havolasi */
+.appt-bot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--blue, #0a6cff);
+  text-decoration: none;
+}
+.appt-bot .ico { width: 17px; height: 17px; }
+.appt-bot:hover { opacity: 0.75; }

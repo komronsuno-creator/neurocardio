@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Icon from "./icons";
+import { botLink } from "./lib/bot-link";
 import { DICT, doctorText } from "./lib/i18n";
 import type { Doctor, Lang } from "./lib/types";
 
@@ -181,6 +183,14 @@ export default function DoctorModal({
             <a className="btn btn-glass" href={`tel:${d.phone}`}>
               ☎ {DICT[lang].doctors.call}
             </a>
+            <a className="btn btn-glass" href={botLink(`doc_${d.id}`)} target="_blank" rel="noopener noreferrer">
+              <Icon name="bot" /> {DICT[lang].doctors.writeBot}
+            </a>
+            {d.instagram ? (
+              <a className="btn btn-glass" href={d.instagram} target="_blank" rel="noopener noreferrer">
+                <Icon name="instagram" /> Instagram
+              </a>
+            ) : null}
           </div>
         </div>
       </div>
