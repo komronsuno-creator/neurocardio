@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shifokor kabineti — NeyroCardio",
+  title: { absolute: "Shifokor kabineti — NeyroCardio" },
   robots: { index: false, follow: false },
 };
 

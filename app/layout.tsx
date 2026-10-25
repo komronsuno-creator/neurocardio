@@ -15,10 +15,60 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE = "https://neyrocardio.uz";
+const DESC =
+  "NeyroCardio — nevrolog va kardiolog shifokorlar: bosh og‘rig‘i, asab kasalliklari, yurak og‘rig‘i, qon bosimi, aritmiya. Toshkentda qabulga yozilish, shifokorga onlayn savol berish. Невролог и кардиолог в Ташкенте.";
+
 export const metadata: Metadata = {
-  title: "NeuroCardio",
-  description:
-    "Nevrologiya, kardiologiya va umumiy salomatlik haqida shifokorlar tayyorlagan ishonchli ma’lumotlar.",
+  metadataBase: new URL(SITE),
+  title: {
+    default: "NeyroCardio — nevrolog va kardiolog Toshkentda | Невролог и кардиолог в Ташкенте",
+    template: "%s | NeyroCardio",
+  },
+  description: DESC,
+  applicationName: "NeyroCardio",
+  keywords: [
+    "nevrolog", "kardiolog", "nevrologiya", "kardiologiya", "neyrokardiologiya", "nevropatolog",
+    "asab doktori", "asab kasalliklari", "yurak doktori", "yurak og‘rig‘i", "yurak og'rig'i",
+    "bosh og‘rig‘i", "bosh aylanishi", "migren", "insult", "qon bosimi", "gipertoniya", "aritmiya",
+    "yurak urishi", "EKG", "shifokor Toshkent", "Olmazor shifokor", "Real Medical", "qabulga yozilish",
+    "невролог Ташкент", "кардиолог Ташкент", "неврология", "кардиология", "боль в сердце",
+    "головная боль", "давление", "аритмия", "инсульт", "врач невропатолог", "запись к врачу Ташкент",
+  ],
+  alternates: {
+    canonical: "/",
+    languages: { "uz-UZ": "/", "ru-RU": "/", "x-default": "/" },
+  },
+  openGraph: {
+    type: "website",
+    url: SITE,
+    siteName: "NeyroCardio",
+    locale: "uz_UZ",
+    alternateLocale: ["ru_RU"],
+    title: "NeyroCardio — nevrolog va kardiolog Toshkentda",
+    description: DESC,
+    images: [{ url: "/doctor-2.png", alt: "NeyroCardio shifokorlari" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NeyroCardio — nevrolog va kardiolog Toshkentda",
+    description: DESC,
+    images: ["/doctor-2.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  category: "medical",
+  // Google Search Console tasdiq kodi Netlify'dagi GOOGLE_SITE_VERIFICATION o'zgaruvchisidan olinadi
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
+  other: {
+    "geo.region": "UZ-TK",
+    "geo.placename": "Tashkent",
+    "geo.position": "41.351556;69.212944",
+    ICBM: "41.351556, 69.212944",
+  },
 };
 
 export default function RootLayout({
